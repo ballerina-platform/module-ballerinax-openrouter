@@ -22,8 +22,8 @@ const string MOCK_GUARDRAIL_ID = "guardrail-mock-001";
 const string TEST_CHAT_MODEL = "openai/gpt-3.5-turbo";
 
 // Configurable variables – set via Config.toml or environment variables
-configurable boolean isLiveServer = ?;
-configurable string token = ?;
+configurable boolean isLiveServer = false;
+configurable string token = "";
 
 // Module-level state shared across dependent tests
 string createdKeyHash = "";
