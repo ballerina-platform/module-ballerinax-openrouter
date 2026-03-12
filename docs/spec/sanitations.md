@@ -1,12 +1,12 @@
-_Author_:  <!-- TODO: Add author name --> \
-_Created_: <!-- TODO: Add date --> \
-_Updated_: <!-- TODO: Add date --> \
+_Author_:  @lnash94
+_Created_: 2026/03/12
+_Updated_: 2026/03/12
 _Edition_: Swan Lake
 
 # Sanitation for OpenAPI specification
 
 This document records the sanitation done on top of the official OpenAPI specification from Ballerina OpenRouter Connector. 
-The OpenAPI specification is obtained from (TODO: Add source link).
+The OpenAPI specification is obtained from (https://openrouter.ai/docs/api/reference/overview).
 These changes are done in order to improve the overall usability, and as workarounds for some known language limitations.
 
 Summary of Changes
@@ -21,7 +21,7 @@ Summary of Changes
 │ 3   │ types.bal  │ 2228 │ inline_response_200_6                    │ CreateEmbeddingsResponse      │
 ├─────┼────────────┼──────┼──────────────────────────────────────────┼───────────────────────────────┤
 │ 4   │ client.bal │ 98   │ inline_response_200_6 (return type)      │ CreateEmbeddingsResponse      │
-
+└─────┴────────────┴──────┴──────────────────────────────────────────┴───────────────────────────────┘
 
 ┌─────┬────────────┬──────┬─────────────────────────────────────────┬─────────────────────────┐                                                                                 
 │  #  │    File    │ Line │                Old Name                 │        New Name         │
@@ -168,6 +168,6 @@ The following command was used to generate the Ballerina client from the OpenAPI
 
 ```bash
 bal openapi align -i <yml> 
-bal openapi -i <aligned yml>
+bal openapi -i <aligned yml> --mode client
 ```
 Note: The license year is hardcoded to 2026, change if necessary.
