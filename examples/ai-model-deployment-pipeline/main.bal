@@ -1,25 +1,23 @@
 import ballerina/io;
 import ballerinax/openrouter;
-import ballerina/http;
 
 configurable string openRouterApiKey = ?;
 configurable string appUrl = "https://myapp.example.com";
 configurable string appTitle = "AI Model Selection Pipeline";
 
 public function main() returns error? {
-    
+
     openrouter:ConnectionConfig config = {
         auth: {
             token: openRouterApiKey
         }
     };
-
     openrouter:Client openRouterClient = check new (config);
 
     openrouter:ListModelsCountHeaders countHeaders = {
-        hTTPReferer: appUrl,
-        xOpenRouterTitle: appTitle,
-        xOpenRouterCategories: "ai-assistant,text-generation"
+        HTTP\-Referer: appUrl,
+        X\-OpenRouter\-Title: appTitle,
+        X\-OpenRouter\-Categories: "ai-assistant,text-generation"
     };
 
     io:println("Step 1: Analyzing available AI models...");
@@ -27,8 +25,8 @@ public function main() returns error? {
     io:println("Available models: " + modelsCount.data.count.toString());
 
     openrouter:GetCreditsHeaders creditsHeaders = {
-        hTTPReferer: appUrl,
-        xOpenRouterTitle: appTitle
+        HTTP\-Referer: appUrl,
+        X\-OpenRouter\-Title: appTitle
     };
 
     io:println("\nStep 2: Checking credit balance...");
@@ -57,9 +55,9 @@ public function main() returns error? {
     };
 
     openrouter:SendChatCompletionRequestHeaders chatHeaders = {
-        hTTPReferer: appUrl,
-        xOpenRouterTitle: appTitle,
-        xOpenRouterCategories: "ai-assistant,text-generation"
+        HTTP\-Referer: appUrl,
+        X\-OpenRouter\-Title: appTitle,
+        X\-OpenRouter\-Categories: "ai-assistant,text-generation"
     };
 
     io:println("\nStep 3: Testing selected model performance...");
