@@ -44,7 +44,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "crypto"
-version = "2.10.1"
+version = "2.9.3"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
@@ -163,6 +163,15 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "lang.error"
+version = "0.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+
+[[package]]
+org = "ballerina"
 name = "lang.int"
 version = "0.0.0"
 dependencies = [
@@ -219,6 +228,9 @@ dependencies = [
 	{org = "ballerina", name = "lang.value"},
 	{org = "ballerina", name = "observe"}
 ]
+modules = [
+	{org = "ballerina", packageName = "log", moduleName = "log"}
+]
 
 [[package]]
 org = "ballerina"
@@ -247,7 +259,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "observe"
-version = "1.6.0"
+version = "1.5.1"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -264,17 +276,30 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "task"
-version = "2.11.1"
+version = "2.7.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "time"},
-	{org = "ballerina", name = "uuid"}
+	{org = "ballerina", name = "time"}
+]
+
+[[package]]
+org = "ballerina"
+name = "test"
+version = "0.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.array"},
+	{org = "ballerina", name = "lang.error"}
+]
+modules = [
+	{org = "ballerina", packageName = "test", moduleName = "test"}
 ]
 
 [[package]]
 org = "ballerina"
 name = "time"
-version = "2.8.0"
+version = "2.7.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -291,17 +316,6 @@ modules = [
 ]
 
 [[package]]
-org = "ballerina"
-name = "uuid"
-version = "1.10.0"
-dependencies = [
-	{org = "ballerina", name = "crypto"},
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "lang.int"},
-	{org = "ballerina", name = "time"}
-]
-
-[[package]]
 org = "ballerinai"
 name = "observe"
 version = "0.0.0"
@@ -314,18 +328,20 @@ modules = [
 ]
 
 [[package]]
-org = "sumudunissanka"
+org = "ballerinax"
 name = "openrouter"
-version = "0.1.3"
+version = "1.0.0"
 dependencies = [
 	{org = "ballerina", name = "constraint"},
 	{org = "ballerina", name = "data.jsondata"},
 	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "test"},
 	{org = "ballerina", name = "url"},
 	{org = "ballerinai", name = "observe"}
 ]
 modules = [
-	{org = "sumudunissanka", packageName = "openrouter", moduleName = "openrouter"},
-	{org = "sumudunissanka", packageName = "openrouter", moduleName = "openrouter.mock.server"}
+	{org = "ballerinax", packageName = "openrouter", moduleName = "openrouter"},
+	{org = "ballerinax", packageName = "openrouter", moduleName = "openrouter.mock.server"}
 ]
 
