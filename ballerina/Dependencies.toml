@@ -353,7 +353,6 @@ dependencies = [
 	{org = "ballerinai", name = "observe"}
 ]
 modules = [
-	{org = "ballerinax", packageName = "openrouter", moduleName = "openrouter"},
-	{org = "ballerinax", packageName = "openrouter", moduleName = "openrouter.mock.server"}
+	{org = "ballerinax", packageName = "openrouter", moduleName = "openrouter"}
 ]
 
