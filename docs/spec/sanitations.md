@@ -5,169 +5,102 @@ _Edition_: Swan Lake
 
 # Sanitation for OpenAPI specification
 
-This document records the sanitation done on top of the official OpenAPI specification from Ballerina OpenRouter Connector. 
+This document records the sanitation done on top of the official OpenAPI specification from Ballerina OpenRouter Connector.
 The OpenAPI specification is obtained from (https://openrouter.ai/docs/api/reference/overview).
 These changes are done in order to improve the overall usability, and as workarounds for some known language limitations.
 
-Summary of Changes
+## Summary of Changes
 
-┌─────┬────────────┬──────┬──────────────────────────────────────────┬───────────────────────────────┐                                                                          
-│  #  │    File    │ Line │                 Old Name                 │           New Name            │                                                                        
-├─────┼────────────┼──────┼──────────────────────────────────────────┼───────────────────────────────┤
-│ 1   │ types.bal  │ 1679 │ inline_response_200_6_usage              │ CreateEmbeddingsResponseUsage │
-├─────┼────────────┼──────┼──────────────────────────────────────────┼───────────────────────────────┤
-│ 2   │ types.bal  │ 2233 │ inline_response_200_6_usage (field type) │ CreateEmbeddingsResponseUsage │
-├─────┼────────────┼──────┼──────────────────────────────────────────┼───────────────────────────────┤
-│ 3   │ types.bal  │ 2228 │ inline_response_200_6                    │ CreateEmbeddingsResponse      │
-├─────┼────────────┼──────┼──────────────────────────────────────────┼───────────────────────────────┤
-│ 4   │ client.bal │ 98   │ inline_response_200_6 (return type)      │ CreateEmbeddingsResponse      │
-└─────┴────────────┴──────┴──────────────────────────────────────────┴───────────────────────────────┘
+| # | File | Line | Old Name | New Name |
+|---|------|------|----------|----------|
+| 1 | types.bal | 1679 | inline_response_200_6_usage | CreateEmbeddingsResponseUsage |
+| 2 | types.bal | 2233 | inline_response_200_6_usage (field type) | CreateEmbeddingsResponseUsage |
+| 3 | types.bal | 2228 | inline_response_200_6 | CreateEmbeddingsResponse |
+| 4 | client.bal | 98 | inline_response_200_6 (return type) | CreateEmbeddingsResponse |
 
-┌─────┬────────────┬──────┬─────────────────────────────────────────┬─────────────────────────┐                                                                                 
-│  #  │    File    │ Line │                Old Name                 │        New Name         │
-├─────┼────────────┼──────┼─────────────────────────────────────────┼─────────────────────────┤                                                                                 
-│ 1   │ types.bal  │ 1707 │ inline_response_201_1_data              │ GuardrailData           │                                                                               
-├─────┼────────────┼──────┼─────────────────────────────────────────┼─────────────────────────┤
-│ 2   │ types.bal  │ 2798 │ inline_response_201_1                   │ CreateGuardrailResponse │
-├─────┼────────────┼──────┼─────────────────────────────────────────┼─────────────────────────┤
-│ 3   │ types.bal  │ 2800 │ inline_response_201_1_data (field type) │ GuardrailData           │
-├─────┼────────────┼──────┼─────────────────────────────────────────┼─────────────────────────┤
-│ 4   │ client.bal │ 268  │ inline_response_201_1 (return type)     │ CreateGuardrailResponse │
-└─────┴────────────┴──────┴─────────────────────────────────────────┴─────────────────────────┘
-Response types (inline_response_*)
+| # | File | Line | Old Name | New Name |
+|---|------|------|----------|----------|
+| 1 | types.bal | 1707 | inline_response_201_1_data | GuardrailData |
+| 2 | types.bal | 2798 | inline_response_201_1 | CreateGuardrailResponse |
+| 3 | types.bal | 2800 | inline_response_201_1_data (field type) | GuardrailData |
+| 4 | client.bal | 268 | inline_response_201_1 (return type) | CreateGuardrailResponse |
 
-┌────────────────────────────────────────────────────────────────┬────────────────────────────────────┬──────────────────────────────────────────┐                              
-│                            Old Name                            │              New Name              │                 Endpoint                 │                              
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_2                                          │ ActivityResponse                   │ GET /activity                            │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_4                                          │ CreditsResponse                    │ GET /credits                             │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_4_data                                     │ CreditsData                        │ sub-type of above                        │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_5                                          │ CoinbaseCreditResponse             │ POST /credits/coinbase                   │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_5_data                                     │ CoinbaseCreditData                 │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_5_data_web3_data                           │ Web3Data                           │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_5_data_web3_data_transfer_intent           │ Web3TransferIntent                 │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_5_data_web3_data_transfer_intent_call_data │ Web3TransferIntentCallData         │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_5_data_web3_data_transfer_intent_metadata  │ Web3TransferIntentMetadata         │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_7                                          │ GenerationResponse                 │ GET /generation                          │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_7_data                                     │ GenerationData                     │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_8                                          │ ModelEndpointsResponse             │ GET /models/{author}/{slug}/endpoints    │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_9                                          │ ZdrEndpointsResponse               │ GET /endpoints/zdr                       │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_10                                         │ ProvidersResponse                  │ GET /providers                           │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_11                                         │ KeysListResponse                   │ GET /keys                                │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_12                                         │ KeyDetailsResponse                 │ GET /keys/{hash}                         │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_12_data                                    │ ApiKeyInfo                         │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_13                                         │ DeleteKeyResponse                  │ DELETE /keys/{hash}                      │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_14                                         │ UpdateKeyResponse                  │ PATCH /keys/{hash}                       │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_14_data                                    │ UpdatedApiKeyInfo                  │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_15                                         │ GuardrailListResponse              │ GET /guardrails                          │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_15DataItemsObject                          │ GuardrailListItem                  │ item type                                │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_16                                         │ GetGuardrailResponse               │ GET /guardrails/{id}                     │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_16_data                                    │ GuardrailInfo                      │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_17                                         │ DeleteGuardrailResponse            │ DELETE /guardrails/{id}                  │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_18                                         │ UpdateGuardrailResponse            │ PATCH /guardrails/{id}                   │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_18_data                                    │ UpdatedGuardrailData               │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_19                                         │ GuardrailKeyAssignmentsResponse    │ GET guardrail key assignments            │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_20                                         │ GuardrailMemberAssignmentsResponse │ GET guardrail member assignments         │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_21                                         │ AssignKeysResponse                 │ POST guardrails/{id}/assignments/keys    │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_22                                         │ AssignMembersResponse              │ POST guardrails/{id}/assignments/members │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_23                                         │ RemoveKeysResponse                 │ POST assignments/keys/remove             │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_24                                         │ RemoveMembersResponse              │ POST assignments/members/remove          │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_25                                         │ CurrentKeyResponse                 │ GET /key                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_25_data                                    │ CurrentKeyData                     │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_25_data_rate_limit                         │ KeyRateLimit                       │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_26                                         │ AuthKeyResponse                    │ POST /auth/keys                          │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_27                                         │ KeyCodeResponse                    │ POST /auth/keys/code                     │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_200_27_data                                    │ KeyCodeData                        │ sub-type                                 │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_201                                            │ CreateKeyResponse                  │ POST /keys                               │
-├────────────────────────────────────────────────────────────────┼────────────────────────────────────┼──────────────────────────────────────────┤
-│ inline_response_201_data                                       │ CreatedKeyData                     │ sub-type                                 │
-└────────────────────────────────────────────────────────────────┴────────────────────────────────────┴──────────────────────────────────────────┘
+## Response types (inline_response_*)
 
-Request body types (*_body)
+| Old Name | New Name | Endpoint |
+|----------|----------|----------|
+| inline_response_200_2 | ActivityResponse | GET /activity |
+| inline_response_200_4 | CreditsResponse | GET /credits |
+| inline_response_200_4_data | CreditsData | sub-type of above |
+| inline_response_200_5 | CoinbaseCreditResponse | POST /credits/coinbase |
+| inline_response_200_5_data | CoinbaseCreditData | sub-type |
+| inline_response_200_5_data_web3_data | Web3Data | sub-type |
+| inline_response_200_5_data_web3_data_transfer_intent | Web3TransferIntent | sub-type |
+| inline_response_200_5_data_web3_data_transfer_intent_call_data | Web3TransferIntentCallData | sub-type |
+| inline_response_200_5_data_web3_data_transfer_intent_metadata | Web3TransferIntentMetadata | sub-type |
+| inline_response_200_7 | GenerationResponse | GET /generation |
+| inline_response_200_7_data | GenerationData | sub-type |
+| inline_response_200_8 | ModelEndpointsResponse | GET /models/{author}/{slug}/endpoints |
+| inline_response_200_9 | ZdrEndpointsResponse | GET /endpoints/zdr |
+| inline_response_200_10 | ProvidersResponse | GET /providers |
+| inline_response_200_11 | KeysListResponse | GET /keys |
+| inline_response_200_12 | KeyDetailsResponse | GET /keys/{hash} |
+| inline_response_200_12_data | ApiKeyInfo | sub-type |
+| inline_response_200_13 | DeleteKeyResponse | DELETE /keys/{hash} |
+| inline_response_200_14 | UpdateKeyResponse | PATCH /keys/{hash} |
+| inline_response_200_14_data | UpdatedApiKeyInfo | sub-type |
+| inline_response_200_15 | GuardrailListResponse | GET /guardrails |
+| inline_response_200_15DataItemsObject | GuardrailListItem | item type |
+| inline_response_200_16 | GetGuardrailResponse | GET /guardrails/{id} |
+| inline_response_200_16_data | GuardrailInfo | sub-type |
+| inline_response_200_17 | DeleteGuardrailResponse | DELETE /guardrails/{id} |
+| inline_response_200_18 | UpdateGuardrailResponse | PATCH /guardrails/{id} |
+| inline_response_200_18_data | UpdatedGuardrailData | sub-type |
+| inline_response_200_19 | GuardrailKeyAssignmentsResponse | GET guardrail key assignments |
+| inline_response_200_20 | GuardrailMemberAssignmentsResponse | GET guardrail member assignments |
+| inline_response_200_21 | AssignKeysResponse | POST guardrails/{id}/assignments/keys |
+| inline_response_200_22 | AssignMembersResponse | POST guardrails/{id}/assignments/members |
+| inline_response_200_23 | RemoveKeysResponse | POST assignments/keys/remove |
+| inline_response_200_24 | RemoveMembersResponse | POST assignments/members/remove |
+| inline_response_200_25 | CurrentKeyResponse | GET /key |
+| inline_response_200_25_data | CurrentKeyData | sub-type |
+| inline_response_200_25_data_rate_limit | KeyRateLimit | sub-type |
+| inline_response_200_26 | AuthKeyResponse | POST /auth/keys |
+| inline_response_200_27 | KeyCodeResponse | POST /auth/keys/code |
+| inline_response_200_27_data | KeyCodeData | sub-type |
+| inline_response_201 | CreateKeyResponse | POST /keys |
+| inline_response_201_data | CreatedKeyData | sub-type |
 
-┌──────────────────────────┬─────────────────────────┬─────────────────────────────────┐
-│         Old Name         │        New Name         │            Endpoint             │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ embeddings_body          │ CreateEmbeddingsRequest │ POST /embeddings                │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ guardrails_body          │ CreateGuardrailRequest  │ POST /guardrails                │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ guardrails_id_body       │ UpdateGuardrailRequest  │ PATCH /guardrails/{id}          │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ keys_body                │ CreateKeyRequest        │ POST /keys                      │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ keys_hash_body           │ UpdateKeyRequest        │ PATCH /keys/{hash}              │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ keys_code_body           │ KeyCodeRequest          │ POST /auth/keys/code            │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ keys_remove_body         │ RemoveKeysRequest       │ POST assignments/keys/remove    │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ auth_keys_body           │ AuthKeyRequest          │ POST /auth/keys                 │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ assignments_keys_body    │ AssignKeysRequest       │ POST assignments/keys           │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ assignments_members_body │ AssignMembersRequest    │ POST assignments/members        │
-├──────────────────────────┼─────────────────────────┼─────────────────────────────────┤
-│ members_remove_body      │ RemoveMembersRequest    │ POST assignments/members/remove │
-└──────────────────────────┴─────────────────────────┴─────────────────────────────────┘
+## Request body types (*_body)
 
-Anthropic sub-types (AnthropicMessagesRequest_*)
+| Old Name | New Name | Endpoint |
+|----------|----------|----------|
+| embeddings_body | CreateEmbeddingsRequest | POST /embeddings |
+| guardrails_body | CreateGuardrailRequest | POST /guardrails |
+| guardrails_id_body | UpdateGuardrailRequest | PATCH /guardrails/{id} |
+| keys_body | CreateKeyRequest | POST /keys |
+| keys_hash_body | UpdateKeyRequest | PATCH /keys/{hash} |
+| keys_code_body | KeyCodeRequest | POST /auth/keys/code |
+| keys_remove_body | RemoveKeysRequest | POST assignments/keys/remove |
+| auth_keys_body | AuthKeyRequest | POST /auth/keys |
+| assignments_keys_body | AssignKeysRequest | POST assignments/keys |
+| assignments_members_body | AssignMembersRequest | POST assignments/members |
+| members_remove_body | RemoveMembersRequest | POST assignments/members/remove |
 
-┌────────────────────────────────────────┬───────────────────────────┐
-│                Old Name                │         New Name          │
-├────────────────────────────────────────┼───────────────────────────┤
-│ AnthropicMessagesRequest_metadata      │ AnthropicMessagesMetadata │
-├────────────────────────────────────────┼───────────────────────────┤
-│ AnthropicMessagesRequest_cache_control │ AnthropicCacheControl     │
-├────────────────────────────────────────┼───────────────────────────┤
-│ AnthropicMessagesRequest_provider      │ AnthropicMessagesProvider │
-└────────────────────────────────────────┴───────────────────────────┘
+## Anthropic sub-types (AnthropicMessagesRequest_*)
+
+| Old Name | New Name |
+|----------|----------|
+| AnthropicMessagesRequest_metadata | AnthropicMessagesMetadata |
+| AnthropicMessagesRequest_cache_control | AnthropicCacheControl |
+| AnthropicMessagesRequest_provider | AnthropicMessagesProvider |
 
 ## OpenAPI cli command
 
 The following command was used to generate the Ballerina client from the OpenAPI specification. The command should be executed from the repository root directory.
 
 ```bash
-bal openapi align -i <yml> 
+bal openapi align -i <yml>
 bal openapi -i <aligned yml> --mode client
 ```
 Note: The license year is hardcoded to 2026, change if necessary.
