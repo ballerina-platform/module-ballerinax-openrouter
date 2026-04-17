@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Nullable databinding
+- Formatting issue with sanitation doc
+
+## [v1.0.0]
+
+### Added
 - Initial release of the `ballerinax/openrouter` connector
 - Client implementation for OpenRouter API v1
 - Support for chat completions endpoint
