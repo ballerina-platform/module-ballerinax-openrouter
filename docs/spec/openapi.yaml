@@ -13583,12 +13583,11 @@ paths:
           content:
             application/json:
               example:
-                key: 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
+                key: sk-or
                 user_id: user_2yOPcMpKoQhcd4bVgSMlELRaIah
               schema:
                 example:
-                  key: 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
-                  user_id: user_2yOPcMpKoQhcd4bVgSMlELRaIah
+                  key: sk-or
                 properties:
                   key:
                     description: The API key to use for OpenRouter requests
@@ -16680,7 +16679,7 @@ paths:
                   usage_daily: 0
                   usage_monthly: 0
                   usage_weekly: 0
-                key: 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
+                key: sk-ore1037e0b855d
               schema:
                 example:
                   data:
@@ -16704,7 +16703,7 @@ paths:
                     usage_daily: 0
                     usage_monthly: 0
                     usage_weekly: 0
-                  key: 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
+                  key: sk-or
                 properties:
                   data:
                     description: The created API key information
