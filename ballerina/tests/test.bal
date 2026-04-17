@@ -70,7 +70,7 @@ function testGetCredits() returns error? {
 }
 function testGetCurrentKey() returns error? {
     CurrentKeyResponse response = check testClient->/'key();
-    test:assertTrue(response.data.'limit >= 0.0d, "Current key limit should be non-negative");
+    test:assertTrue((response.data.'limit ?: 0.0d) >= 0.0d, "Current key limit should be non-negative");
 }
 
 // ========================= PROVIDERS =========================
