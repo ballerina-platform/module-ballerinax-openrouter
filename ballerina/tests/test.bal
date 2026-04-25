@@ -93,7 +93,9 @@ function testCreateChatCompletion() returns error? {
     ChatGenerationParams payload = {
         model: TEST_CHAT_MODEL,
         messages: [userMsg],
-        max_tokens: 20
+        max_tokens: 20,
+        temperature: 0.5,
+        top_p: 0.9
     };
     ChatResponse response = check testClient->/chat/completions.post(payload);
     test:assertTrue(response.id.length() > 0, "Chat response should have a non-empty ID");

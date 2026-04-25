@@ -764,7 +764,7 @@ public type RemoveMemberUserId string;
 public type ChatGenerationParams_reasoning record {
     # Constrains effort on reasoning for reasoning models
     "xhigh"|"high"|"medium"|"low"|"minimal"|"none" effort?;
-    anydata summary?;
+    "auto"|"concise"|"detailed"? summary?;
 };
 
 public type UpdateGuardrailRequest record {
@@ -1835,7 +1835,7 @@ public type OpenResponsesRequest record {
     # When multiple model providers are available, optionally indicate your routing preference.
     OpenResponsesRequest_provider provider?;
     # Plugins you want to enable for this request, including their settings.
-    (record {"auto-router" id; boolean enabled?; string[] allowed_models?;}|record {"moderation" id;}|record {"web" id; boolean enabled?; decimal max_results?; string search_prompt?; WebSearchEngine engine?; "web_search_20250305"|"web_search_20260209" native_tool_version?; string[] include_domains?; string[] exclude_domains?;}|record {"file-parser" id; boolean enabled?; PDFParserOptions pdf?;}|record {"response-healing" id; boolean enabled?;})[] plugins?;
+    (AutoRouterPlugin|ModerationPlugin|WebSearchPlugin|FileParserPlugin|ResponseHealingPlugin|ContextCompressionPlugin)[] plugins?;
     # **DEPRECATED** Use providers.sort.partition instead. Backwards-compatible alias for providers.sort.partition. Accepts legacy values: "fallback" (maps to "model"), "sort" (maps to "none").
     # 
     # # Deprecated
@@ -1954,6 +1954,12 @@ public type AnthropicCacheControl record {
     "ephemeral" 'type;
     "5m"|"1h" ttl?;
 };
+
+# Controls output generation speed. When set to `fast`, uses a higher-speed inference configuration at premium pricing.
+public type AnthropicSpeed "fast"|"standard"?;
+
+# Controls whether thinking is included in the response. `summarized` returns a summary, `omitted` excludes it entirely.
+public type AnthropicThinkingDisplay "summarized"|"omitted"?;
 
 # Generated images from image generation models
 public type AssistantMessageImages record {record {string url;} image_url;}[];
@@ -2321,6 +2327,61 @@ public type ProviderPreferences record {
 # The search engine to use for web search.
 public type WebSearchEngine "native"|"exa";
 
+# The compression engine to use. Defaults to "middle-out".
+public type ContextCompressionEngine "middle-out";
+
+# Plugin to automatically route requests to the best model.
+public type AutoRouterPlugin record {
+    "auto-router" id;
+    # Set to false to disable the auto-router plugin for this request. Defaults to true.
+    boolean enabled?;
+    # List of model patterns to filter which models the auto-router can route between. Supports wildcards (e.g., "anthropic/*").
+    string[] allowed_models?;
+};
+
+# Plugin to apply content moderation to requests.
+public type ModerationPlugin record {
+    "moderation" id;
+};
+
+# Plugin to enable web search for requests.
+public type WebSearchPlugin record {
+    "web" id;
+    # Set to false to disable the web-search plugin for this request. Defaults to true.
+    boolean enabled?;
+    WebSearchEngine engine?;
+    # Maximum number of search results to return.
+    int max_results?;
+    string search_prompt?;
+    # A list of domains to restrict web search results to.
+    string[] include_domains?;
+    # A list of domains to exclude from web search results.
+    string[] exclude_domains?;
+};
+
+# Plugin to enable file parsing for requests.
+public type FileParserPlugin record {
+    "file-parser" id;
+    # Set to false to disable the file-parser plugin for this request. Defaults to true.
+    boolean enabled?;
+    PDFParserOptions pdf?;
+};
+
+# Plugin to automatically heal malformed responses.
+public type ResponseHealingPlugin record {
+    "response-healing" id;
+    # Set to false to disable the response-healing plugin for this request. Defaults to true.
+    boolean enabled?;
+};
+
+# Plugin to compress context when it exceeds the model's context window.
+public type ContextCompressionPlugin record {
+    "context-compression" id;
+    # Set to false to disable the context-compression plugin for this request. Defaults to true.
+    boolean enabled?;
+    ContextCompressionEngine engine?;
+};
+
 public type ResponsesOutputItemFunctionCall record {
     *OutputItemFunctionCall;
 };
@@ -2467,9 +2528,9 @@ public type Message SystemMessage|UserMessage|DeveloperMessage|AssistantMessage|
 # Chat completion request parameters
 public type ChatGenerationParams record {
     # When multiple model providers are available, optionally indicate your routing preference.
-    AnthropicMessagesProvider provider?;
+    ProviderPreferences provider?;
     # Plugins you want to enable for this request, including their settings.
-    (record {"auto-router" id; boolean enabled?; string[] allowed_models?;}|record {"moderation" id;}|record {"web" id; boolean enabled?; decimal max_results?; string search_prompt?; WebSearchEngine engine?; "web_search_20250305"|"web_search_20260209" native_tool_version?; string[] include_domains?; string[] exclude_domains?;}|record {"file-parser" id; boolean enabled?; PDFParserOptions pdf?;}|record {"response-healing" id; boolean enabled?;})[] plugins?;
+    (AutoRouterPlugin|ModerationPlugin|WebSearchPlugin|FileParserPlugin|ResponseHealingPlugin|ContextCompressionPlugin)[] plugins?;
     # **DEPRECATED** Use providers.sort.partition instead. Backwards-compatible alias for providers.sort.partition. Accepts legacy values: "fallback" (maps to "model"), "sort" (maps to "none").
     # 
     # # Deprecated
@@ -2477,8 +2538,8 @@ public type ChatGenerationParams record {
     "fallback"|"sort" route?;
     # Unique user identifier
     string user?;
-    # A unique identifier for grouping related requests (e.g., a conversation or agent workflow) for observability. If provided in both the request body and the x-session-id header, the body value takes precedence. Maximum of 128 characters.
-    @constraint:String {maxLength: 128}
+    # A unique identifier for grouping related requests (e.g., a conversation or agent workflow) for observability. If provided in both the request body and the x-session-id header, the body value takes precedence. Maximum of 256 characters.
+    @constraint:String {maxLength: 256}
     string session_id?;
     # Metadata for observability and tracing. Known keys (trace_id, trace_name, span_name, generation_name, parent_span_id) have special handling. Additional keys are passed through as custom metadata to configured broadcast destinations.
     OpenResponsesRequest_trace trace?;
@@ -2492,11 +2553,11 @@ public type ChatGenerationParams record {
     # Frequency penalty (-2.0 to 2.0)
     decimal? frequency_penalty?;
     # Token logit bias adjustments
-    record {||}? logit_bias?;
+    record {| decimal...;|}? logit_bias?;
     # Return log probabilities
     boolean? logprobs?;
     # Number of top log probabilities to return (0-20)
-    decimal? top_logprobs?;
+    int? top_logprobs?;
     # Maximum tokens in completion
     decimal? max_completion_tokens?;
     # Maximum tokens (deprecated, use max_completion_tokens). Note: some providers enforce a minimum of 16.
@@ -2512,22 +2573,20 @@ public type ChatGenerationParams record {
     # Random seed for deterministic outputs
     int? seed?;
     # Stop sequences (up to 4)
-    anydata stop?;
+    string|string[]? stop?;
     # Enable streaming response
     boolean 'stream = false;
     # Streaming configuration options
     ChatStreamOptions stream_options?;
     # Sampling temperature (0-2)
-    @constraint:Number {minValue: 0, maxValue: 2}
-    decimal? temperature;
+    decimal? temperature?;
     boolean? parallel_tool_calls?;
     # Tool choice configuration
     ToolChoiceOption tool_choice?;
     # Available tools for function calling
     ToolDefinitionJson[] tools?;
     # Nucleus sampling parameter (0-1)
-    @constraint:Number {minValue: 0, maxValue: 1}
-    decimal? top_p;
+    decimal? top_p?;
     # Debug options for inspecting request transformations (streaming only)
     DebugOptions debug?;
     # Provider-specific image configuration options. Keys and values vary by model/provider. See https://openrouter.ai/docs/guides/overview/multimodal/image-generation for more details.
@@ -2711,30 +2770,32 @@ public type AnthropicMessagesRequest record {
     decimal top_k?;
     (anydata)[] tools?;
     record {"auto" 'type; boolean disable_parallel_tool_use?;}|record {"any" 'type; boolean disable_parallel_tool_use?;}|record {"none" 'type;}|record {"tool" 'type; string name; boolean disable_parallel_tool_use?;} tool_choice?;
-    record {"enabled" 'type; decimal budget_tokens;}|record {"disabled" 'type;}|record {"adaptive" 'type;} thinking?;
+    record {"enabled" 'type; decimal budget_tokens; AnthropicThinkingDisplay display?;}|record {"disabled" 'type;}|record {"adaptive" 'type; AnthropicThinkingDisplay display?;} thinking?;
     "auto"|"standard_only" service_tier?;
     record {}? context_management?;
     AnthropicCacheControl cache_control?;
     # When multiple model providers are available, optionally indicate your routing preference.
     AnthropicMessagesProvider provider?;
     # Plugins you want to enable for this request, including their settings.
-    (record {"auto-router" id; boolean enabled?; string[] allowed_models?;}|record {"moderation" id;}|record {"web" id; boolean enabled?; decimal max_results?; string search_prompt?; WebSearchEngine engine?; "web_search_20250305"|"web_search_20260209" native_tool_version?; string[] include_domains?; string[] exclude_domains?;}|record {"file-parser" id; boolean enabled?; PDFParserOptions pdf?;}|record {"response-healing" id; boolean enabled?;})[] plugins?;
+    (AutoRouterPlugin|ModerationPlugin|WebSearchPlugin|FileParserPlugin|ResponseHealingPlugin|ContextCompressionPlugin)[] plugins?;
     # **DEPRECATED** Use providers.sort.partition instead. Backwards-compatible alias for providers.sort.partition. Accepts legacy values: "fallback" (maps to "model"), "sort" (maps to "none").
-    # 
+    #
     # # Deprecated
     @deprecated
     "fallback"|"sort" route?;
-    # A unique identifier representing your end-user, which helps distinguish between different users of your app. This allows your app to identify specific users in case of abuse reports, preventing your entire app from being affected by the actions of individual users. Maximum of 128 characters.
-    @constraint:String {maxLength: 128}
+    # A unique identifier representing your end-user, which helps distinguish between different users of your app. This allows your app to identify specific users in case of abuse reports, preventing your entire app from being affected by the actions of individual users. Maximum of 256 characters.
+    @constraint:String {maxLength: 256}
     string user?;
-    # A unique identifier for grouping related requests (e.g., a conversation or agent workflow) for observability. If provided in both the request body and the x-session-id header, the body value takes precedence. Maximum of 128 characters.
-    @constraint:String {maxLength: 128}
+    # A unique identifier for grouping related requests (e.g., a conversation or agent workflow) for observability. If provided in both the request body and the x-session-id header, the body value takes precedence. Maximum of 256 characters.
+    @constraint:String {maxLength: 256}
     string session_id?;
     # Metadata for observability and tracing. Known keys (trace_id, trace_name, span_name, generation_name, parent_span_id) have special handling. Additional keys are passed through as custom metadata to configured broadcast destinations.
     OpenResponsesRequest_trace trace?;
     string[] models?;
     # Configuration for controlling output behavior. Currently supports the effort parameter for Claude Opus 4.5.
     AnthropicOutputConfig output_config?;
+    # Controls output generation speed. When set to `fast`, uses a higher-speed inference configuration at premium pricing. Defaults to `standard` when omitted.
+    AnthropicSpeed speed?;
 };
 
 # Represents the Headers record for the operation: deleteGuardrail
