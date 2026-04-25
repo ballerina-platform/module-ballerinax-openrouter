@@ -305,6 +305,10 @@ public type BaseAnthropicMessagesResponse_usage_cache_creation record {
 public type GetUserActivityQueries record {
     # Filter by a single UTC date in the last 30 days (YYYY-MM-DD format).
     string date?;
+    # Filter by API key hash (SHA-256 hex string, as returned by the keys API).
+    string api_key_hash?;
+    # Filter by org member user ID. Only applicable for organization accounts.
+    string user_id?;
 };
 
 # Price per million prompt tokens
@@ -652,6 +656,12 @@ public type ListModelsCountHeaders record {
     string X\-OpenRouter\-Title?;
 };
 
+# Represents the Queries record for the operation: listModelsCount
+public type ListModelsCountQueries record {
+    # Filter models by output modality. Accepts a comma-separated list of modalities (text, image, audio, embeddings) or "all" to include all models. Defaults to "text".
+    string output_modalities?;
+};
+
 # Represents the Headers record for the operation: bulkAssignKeysToGuardrail
 public type BulkAssignKeysToGuardrailHeaders record {
     # Comma-separated list of app categories (e.g. "cli-agent,cloud-agent"). Used for marketplace rankings.
@@ -718,6 +728,8 @@ public type GetModelsQueries record {
     # Filter models by use case category
     "programming"|"roleplay"|"marketing"|"marketing/seo"|"technology"|"science"|"translation"|"legal"|"finance"|"health"|"trivia"|"academia" category?;
     string supported_parameters?;
+    # Filter models by output modality. Accepts a comma-separated list of modalities (text, image, audio, embeddings) or "all" to include all models. Defaults to "text".
+    string output_modalities?;
 };
 
 # Represents the Headers record for the operation: createGuardrail
@@ -1842,10 +1854,10 @@ public type OpenResponsesRequest record {
     @deprecated
     "fallback"|"sort" route?;
     # A unique identifier representing your end-user, which helps distinguish between different users of your app. This allows your app to identify specific users in case of abuse reports, preventing your entire app from being affected by the actions of individual users. Maximum of 128 characters.
-    @constraint:String {maxLength: 128}
+    @constraint:String {maxLength: 256}
     string user?;
     # A unique identifier for grouping related requests (e.g., a conversation or agent workflow) for observability. If provided in both the request body and the x-session-id header, the body value takes precedence. Maximum of 128 characters.
-    @constraint:String {maxLength: 128}
+    @constraint:String {maxLength: 256}
     string session_id?;
     # Metadata for observability and tracing. Known keys (trace_id, trace_name, span_name, generation_name, parent_span_id) have special handling. Additional keys are passed through as custom metadata to configured broadcast destinations.
     OpenResponsesRequest_trace trace?;
@@ -2149,6 +2161,8 @@ public type CurrentKeyData record {
     boolean? include_byok_in_limit;
     # ISO 8601 UTC timestamp when the API key expires, or null if no expiration
     string expires_at?;
+    # The user ID of the key creator. For organization-owned keys, this is the member who created the key. For individual users, this is the user's own ID.
+    string? creator_user_id;
     # Legacy rate limit information about a key. Will always return -1.
     KeyRateLimit rate_limit;
 };
@@ -2594,7 +2608,7 @@ public type ChatGenerationParams record {
     # Output modalities for the response. Supported values are "text", "image", and "audio".
     ("text"|"image"|"audio")[] modalities?;
     # Enable automatic prompt caching. When set, the system automatically applies cache breakpoints to the last cacheable block in the request. Currently supported for Anthropic Claude models.
-    ChatGenerationParams_cache_control cache_control?;
+    AnthropicCacheControlDirective cache_control?;
     # The service tier to use for processing this request.
     ("auto"|"default"|"flex"|"priority"|"scale")? service_tier?;
 };
@@ -2604,7 +2618,7 @@ public type ListQueries record {
     # Whether to include disabled API keys in the response
     boolean include_disabled?;
     # Number of API keys to skip for pagination
-    string offset?;
+    int? offset?;
 };
 
 public type GuardrailKeyAssignmentsResponse record {
@@ -2649,7 +2663,7 @@ public type BaseAnthropicMessagesResponse_usage_server_tool_use record {
 };
 
 # Enable automatic prompt caching. When set, the system automatically applies cache breakpoints to the last cacheable block in the request. Currently supported for Anthropic Claude models.
-public type ChatGenerationParams_cache_control record {
+public type AnthropicCacheControlDirective record {
     "ephemeral" 'type;
     "5m"|"1h" ttl?;
 };
@@ -2846,6 +2860,9 @@ public type CreateKeyRequest record {
     boolean include_byok_in_limit?;
     # Optional ISO 8601 UTC timestamp when the API key should expire. Must be UTC, other timezones will be rejected
     string expires_at?;
+    # Optional user ID of the key creator. Only meaningful for organization-owned keys where a specific member is creating the key.
+    @constraint:String {minLength: 1}
+    string? creator_user_id?;
 };
 
 # Plain text response format

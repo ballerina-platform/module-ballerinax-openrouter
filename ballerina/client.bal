@@ -98,12 +98,10 @@ public isolated client class Client {
     #
     # + headers - Headers to be sent with the request 
     # + return - Returns the calldata to fulfill the transaction 
-    resource isolated function post credits/coinbase(CreateChargeRequest payload, CreateCoinbaseChargeHeaders headers = {}) returns CoinbaseCreditResponse|error {
+    resource isolated function post credits/coinbase(CreateCoinbaseChargeHeaders headers = {}) returns CoinbaseCreditResponse|error {
         string resourcePath = string `/credits/coinbase`;
         map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         http:Request request = new;
-        json jsonBody = jsondata:toJson(payload);
-        request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request, httpHeaders);
     }
 
@@ -146,8 +144,9 @@ public isolated client class Client {
     #
     # + headers - Headers to be sent with the request 
     # + return - Returns the total count of available models 
-    resource isolated function get models/count(ListModelsCountHeaders headers = {}) returns ModelsCountResponse|error {
+    resource isolated function get models/count(ListModelsCountHeaders headers = {}, *ListModelsCountQueries queries) returns ModelsCountResponse|error {
         string resourcePath = string `/models/count`;
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
         map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
