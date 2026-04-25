@@ -2519,7 +2519,7 @@ public type ChatGenerationParams record {
     ChatStreamOptions stream_options?;
     # Sampling temperature (0-2)
     @constraint:Number {minValue: 0, maxValue: 2}
-    decimal? temperature = 1;
+    decimal? temperature;
     boolean? parallel_tool_calls?;
     # Tool choice configuration
     ToolChoiceOption tool_choice?;
@@ -2527,7 +2527,7 @@ public type ChatGenerationParams record {
     ToolDefinitionJson[] tools?;
     # Nucleus sampling parameter (0-1)
     @constraint:Number {minValue: 0, maxValue: 1}
-    decimal? top_p = 1;
+    decimal? top_p;
     # Debug options for inspecting request transformations (streaming only)
     DebugOptions debug?;
     # Provider-specific image configuration options. Keys and values vary by model/provider. See https://openrouter.ai/docs/guides/overview/multimodal/image-generation for more details.
