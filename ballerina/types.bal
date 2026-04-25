@@ -23,12 +23,6 @@ import ballerina/http;
 # Tokenizer type used by the model
 public type ModelGroup "Router"|"Media"|"Other"|"GPT"|"Claude"|"Gemini"|"Gemma"|"Grok"|"Cohere"|"Nova"|"Qwen"|"Yi"|"DeepSeek"|"Mistral"|"Llama2"|"Llama3"|"Llama4"|"PaLM"|"RWKV"|"Qwen3";
 
-# Create a Coinbase charge for crypto payment
-public type CreateChargeRequest record {
-    decimal amount;
-    string sender;
-    1|137|8453 chain_id;
-};
 
 # The guardrail
 public type GuardrailInfo record {
@@ -230,7 +224,7 @@ public type AuthKeyResponse record {
 
 # Chat completion choice
 public type ChatResponseChoice record {
-    anydata finish_reason;
+    ChatCompletionFinishReason finish_reason;
     # Choice index
     decimal index;
     # Assistant message for requests and responses
@@ -244,28 +238,11 @@ public type CurrentKeyResponse record {
     CurrentKeyData data;
 };
 
-# The output from a function call execution
-public type OpenResponsesFunctionCallOutput record {
-    "function_call_output" 'type;
-    string id?;
-    string call_id;
-    string|(ResponseInputText|record {*ResponseInputImage;}|ResponseInputFile)[] output;
-    ToolCallStatus status?;
-};
 
 # Code interpreter tool configuration
 public type OpenResponsesCodeInterpreterTool record {
     "code_interpreter" 'type;
     string|record {"auto" 'type; string[] file_ids?; "1g"|"4g"|"16g"|"64g" memory_limit?;} container;
-};
-
-# Metadata for observability and tracing. Known keys (trace_id, trace_name, span_name, generation_name, parent_span_id) have special handling. Additional keys are passed through as custom metadata to configured broadcast destinations.
-public type OpenResponsesRequest_trace record {
-    string trace_id?;
-    string trace_name?;
-    string span_name?;
-    string generation_name?;
-    string parent_span_id?;
 };
 
 # Represents the Headers record for the operation: listEndpoints
@@ -374,15 +351,6 @@ public type ChatMessageToolCall record {
 
 public type OpenAIResponsesResponseStatus "completed"|"incomplete"|"in_progress"|"failed"|"cancelled"|"queued";
 
-# A function call initiated by the model
-public type OpenResponsesFunctionToolCall record {
-    "function_call" 'type;
-    string call_id;
-    string name;
-    string arguments;
-    string id;
-    ToolCallStatus status?;
-};
 
 # Preferred maximum latency (in seconds). Can be a number (applies to p50) or an object with percentile-specific cutoffs. Endpoints above the threshold(s) may still be used, but are deprioritized in routing. When using fallback models, this may cause a fallback model to be used instead of the primary model if it meets the threshold.
 public type PreferredMaxLatency anydata;
@@ -1066,12 +1034,6 @@ public type PublicPricing record {
     decimal discount?;
 };
 
-# Configuration for controlling output behavior. Currently supports the effort parameter for Claude Opus 4.5.
-public type AnthropicOutputConfig record {
-    # How much effort the model should put into its response. Higher effort levels may result in more thorough analysis but take longer. Valid values are `low`, `medium`, `high`, or `max`.
-    "low"|"medium"|"high"|"max" effort?;
-};
-
 # Web search tool configuration (2025-08-26 version)
 public type OpenResponsesWebSearch20250826Tool record {
     "web_search_2025_08_26" 'type;
@@ -1231,18 +1193,6 @@ public type UpdatedApiKeyInfo record {
     string? creator_user_id?;
 };
 
-# Percentile-based throughput cutoffs. All specified cutoffs must be met for an endpoint to be preferred.
-public type PercentileThroughputCutoffs record {
-    # Minimum p50 throughput (tokens/sec)
-    decimal p50?;
-    # Minimum p75 throughput (tokens/sec)
-    decimal p75?;
-    # Minimum p90 throughput (tokens/sec)
-    decimal p90?;
-    # Minimum p99 throughput (tokens/sec)
-    decimal p99?;
-};
-
 # Represents the Headers record for the operation: listProviders
 public type ListProvidersHeaders record {
     # Comma-separated list of app categories (e.g. "cli-agent,cloud-agent"). Used for marketplace rankings.
@@ -1316,25 +1266,20 @@ public type CreateGuardrailRequest record {
     boolean? enforce_zdr?;
 };
 
-# A compound filter that combines multiple comparison or compound filters
-public type CompoundFilter record {
-    "and"|"or" 'type;
-    record {}[] filters;
-};
 
 # List of available endpoints for a model
 public type ListEndpointsResponse record {
+    record {*ModelArchitecture; InputModality[] input_modalities; InstructType instruct_type; string modality; OutputModality[] output_modalities; ModelGroup tokenizer;} architecture;
+    # Unix timestamp of when the model was created
+    int created;
+    # Description of the model
+    string description;
+    # List of available endpoints for this model
+    PublicEndpoint[] endpoints;
     # Unique identifier for the model
     string id;
     # Display name of the model
     string name;
-    # Unix timestamp of when the model was created
-    decimal created;
-    # Description of the model
-    string description;
-    ModelArchitecture architecture;
-    # List of available endpoints for this model
-    PublicEndpoint[] endpoints;
 };
 
 # Models to use for completion
@@ -1689,13 +1634,6 @@ public type ResponseInputAudio_input_audio record {
 # Preferred minimum throughput (in tokens per second). Can be a number (applies to p50) or an object with percentile-specific cutoffs. Endpoints below the threshold(s) may still be used, but are deprioritized in routing. When using fallback models, this may cause a fallback model to be used instead of the primary model if it meets the threshold.
 public type PreferredMinThroughput anydata;
 
-public type OpenResponsesEasyInputMessage record {
-    "message" 'type?;
-    "user"|"system"|"assistant"|"developer" role;
-    anydata content?;
-    # The phase of an assistant message. Use `commentary` for an intermediate assistant message and `final_answer` for the final assistant message. For follow-up requests with models like `gpt-5.3-codex` and later, preserve and resend phase on all assistant messages. Omitting it can degrade performance. Not used for user messages.
-    anydata phase?;
-};
 
 # Complete non-streaming response from the Responses API
 public type OpenResponsesNonStreamingResponse record {
@@ -1848,11 +1786,7 @@ public type OpenResponsesRequest record {
     OpenResponsesRequest_provider provider?;
     # Plugins you want to enable for this request, including their settings.
     (AutoRouterPlugin|ModerationPlugin|WebSearchPlugin|FileParserPlugin|ResponseHealingPlugin|ContextCompressionPlugin)[] plugins?;
-    # **DEPRECATED** Use providers.sort.partition instead. Backwards-compatible alias for providers.sort.partition. Accepts legacy values: "fallback" (maps to "model"), "sort" (maps to "none").
-    # 
-    # # Deprecated
-    @deprecated
-    "fallback"|"sort" route?;
+    DeprecatedRoute route?;
     # A unique identifier representing your end-user, which helps distinguish between different users of your app. This allows your app to identify specific users in case of abuse reports, preventing your entire app from being affected by the actions of individual users. Maximum of 128 characters.
     @constraint:String {maxLength: 256}
     string user?;
@@ -1860,7 +1794,7 @@ public type OpenResponsesRequest record {
     @constraint:String {maxLength: 256}
     string session_id?;
     # Metadata for observability and tracing. Known keys (trace_id, trace_name, span_name, generation_name, parent_span_id) have special handling. Additional keys are passed through as custom metadata to configured broadcast destinations.
-    OpenResponsesRequest_trace trace?;
+    TraceConfig trace?;
 };
 
 public type CreateEmbeddingsRequest record {
@@ -1962,10 +1896,6 @@ public type CreateCoinbaseChargeHeaders record {
     string X\-OpenRouter\-Title?;
 };
 
-public type AnthropicCacheControl record {
-    "ephemeral" 'type;
-    "5m"|"1h" ttl?;
-};
 
 # Controls output generation speed. When set to `fast`, uses a higher-speed inference configuration at premium pricing.
 public type AnthropicSpeed "fast"|"standard"?;
@@ -2036,13 +1966,6 @@ public type Model record {
     string expiration_date?;
 };
 
-# Reasoning output item with signature and format extensions
-public type OpenResponsesReasoning record {
-    *OutputItemReasoning;
-    ReasoningTextContent[] content?;
-    string signature?;
-    "unknown"|"openai-responses-v1"|"azure-openai-responses-v1"|"xai-responses-v1"|"anthropic-claude-v1"|"google-gemini-v1" format?;
-};
 
 # Represents the Queries record for the operation: listGuardrails
 public type ListGuardrailsQueries record {
@@ -2085,12 +2008,6 @@ public type ToolDefinitionJson record {
     ChatMessageContentItemCacheControl cache_control?;
 };
 
-public type OpenResponsesInputMessageItem record {
-    string id?;
-    "message" 'type?;
-    "user"|"system"|"developer" role;
-    (ResponseInputText|record {*ResponseInputImage;}|ResponseInputFile|ResponseInputAudio|ResponseInputVideo)[] content?;
-};
 
 public type CoinbaseCreditData record {
     string id;
@@ -2202,56 +2119,9 @@ public type CreateMessagesHeaders record {
     string X\-OpenRouter\-Title?;
 };
 
-# When multiple model providers are available, optionally indicate your routing preference.
-public type AnthropicMessagesProvider record {|
-    # Whether to allow backup providers to serve requests
-    # - true: (default) when the primary provider (or your custom providers in "order") is unavailable, use the next best provider.
-    # - false: use only the primary/custom provider, and return the upstream error if it's unavailable.
-    boolean allow_fallbacks?;
-    # Whether to filter providers to only those that support the parameters you've provided. If this setting is omitted or set to false, then providers will receive only the parameters they support, and ignore the rest.
-    boolean require_parameters?;
-    # Data collection setting. If no available model provider meets the requirement, your request will return an error.
-    # - allow: (default) allow providers which store user data non-transiently and may train on it
-    # 
-    # - deny: use only providers which do not collect user data.
-    DataCollection data_collection?;
-    # Whether to restrict routing to only ZDR (Zero Data Retention) endpoints. When true, only endpoints that do not retain prompts will be used.
-    boolean zdr?;
-    # Whether to restrict routing to only models that allow text distillation. When true, only models where the author has allowed distillation will be used.
-    boolean enforce_distillable_text?;
-    # An ordered list of provider slugs. The router will attempt to use the first provider in the subset of this list that supports your requested model, and fall back to the next if it is unavailable. If no providers are available, the request will fail with an error message.
-    (ProviderName|string)[] 'order?;
-    # List of provider slugs to allow. If provided, this list is merged with your account-wide allowed provider settings for this request.
-    (ProviderName|string)[] only?;
-    # List of provider slugs to ignore. If provided, this list is merged with your account-wide ignored provider settings for this request.
-    (ProviderName|string)[] ignore?;
-    # A list of quantization levels to filter the provider by.
-    Quantization[] quantizations?;
-    ProviderSort sort?;
-    # The object specifying the maximum price you want to pay for this request. USD price per million tokens, for prompt and completion.
-    OpenResponsesRequest_provider_max_price max_price?;
-    # Preferred minimum throughput (in tokens per second). Can be a number (applies to p50) or an object with percentile-specific cutoffs. Endpoints below the threshold(s) may still be used, but are deprioritized in routing. When using fallback models, this may cause a fallback model to be used instead of the primary model if it meets the threshold.
-    PreferredMinThroughput preferred_min_throughput?;
-    # Preferred maximum latency (in seconds). Can be a number (applies to p50) or an object with percentile-specific cutoffs. Endpoints above the threshold(s) may still be used, but are deprioritized in routing. When using fallback models, this may cause a fallback model to be used instead of the primary model if it meets the threshold.
-    PreferredMaxLatency preferred_max_latency?;
-|};
-
 # The provider sorting strategy (price, throughput, latency)
 public type ProviderSort "price"|"throughput"|"latency";
 
-public type GuardrailListItem record {
-    string id;
-    string name;
-    string description?;
-    decimal limit_usd?;
-    "daily"|"weekly"|"monthly" reset_interval?;
-    string[] allowed_providers?;
-    string[] ignored_providers?;
-    string[] allowed_models?;
-    boolean enforce_zdr?;
-    string created_at;
-    string updated_at?;
-};
 
 public type AssignKeyHash string;
 
@@ -2329,7 +2199,7 @@ public type ProviderPreferences record {
     (ProviderName|string)[] ignore?;
     # A list of quantization levels to filter the provider by.
     Quantization[] quantizations?;
-    ProviderSort sort?;
+    ProviderSort|ProviderSortConfig? sort?;
     # The object specifying the maximum price you want to pay for this request. USD price per million tokens, for prompt and completion.
     OpenResponsesRequest_provider_max_price max_price?;
     # Preferred minimum throughput (in tokens per second). Can be a number (applies to p50) or an object with percentile-specific cutoffs. Endpoints below the threshold(s) may still be used, but are deprioritized in routing. When using fallback models, this may cause a fallback model to be used instead of the primary model if it meets the threshold.
@@ -2545,18 +2415,14 @@ public type ChatGenerationParams record {
     ProviderPreferences provider?;
     # Plugins you want to enable for this request, including their settings.
     (AutoRouterPlugin|ModerationPlugin|WebSearchPlugin|FileParserPlugin|ResponseHealingPlugin|ContextCompressionPlugin)[] plugins?;
-    # **DEPRECATED** Use providers.sort.partition instead. Backwards-compatible alias for providers.sort.partition. Accepts legacy values: "fallback" (maps to "model"), "sort" (maps to "none").
-    # 
-    # # Deprecated
-    @deprecated
-    "fallback"|"sort" route?;
+    DeprecatedRoute route?;
     # Unique user identifier
     string user?;
     # A unique identifier for grouping related requests (e.g., a conversation or agent workflow) for observability. If provided in both the request body and the x-session-id header, the body value takes precedence. Maximum of 256 characters.
     @constraint:String {maxLength: 256}
     string session_id?;
     # Metadata for observability and tracing. Known keys (trace_id, trace_name, span_name, generation_name, parent_span_id) have special handling. Additional keys are passed through as custom metadata to configured broadcast destinations.
-    OpenResponsesRequest_trace trace?;
+    TraceConfig trace?;
     # List of messages for the conversation
     @constraint:Array {minLength: 1}
     Message[] messages;
@@ -2631,12 +2497,6 @@ public type GuardrailKeyAssignmentsResponse record {
 public type UpdateGuardrailResponse record {
     # The updated guardrail
     UpdatedGuardrailData data;
-};
-
-# Anthropic message with OpenRouter extensions
-public type OpenRouterAnthropicMessageParam record {
-    "user"|"assistant" role;
-    anydata content;
 };
 
 # User message
@@ -2729,18 +2589,6 @@ public type CreateKeyResponse record {
     string 'key;
 };
 
-# Percentile-based latency cutoffs. All specified cutoffs must be met for an endpoint to be preferred.
-public type PercentileLatencyCutoffs record {
-    # Maximum p50 latency (seconds)
-    decimal p50?;
-    # Maximum p75 latency (seconds)
-    decimal p75?;
-    # Maximum p90 latency (seconds)
-    decimal p90?;
-    # Maximum p99 latency (seconds)
-    decimal p99?;
-};
-
 # File search tool configuration
 public type OpenResponsesFileSearchTool record {
     "file_search" 'type;
@@ -2772,44 +2620,132 @@ public type FilePath record {
 
 # Request schema for Anthropic Messages API endpoint
 public type AnthropicMessagesRequest record {
-    string model;
-    decimal max_tokens;
-    OpenRouterAnthropicMessageParam[]? messages;
-    string|record {"text" 'type; string text; (record {"char_location" 'type; string cited_text; decimal document_index; string document_title; decimal start_char_index; decimal end_char_index;}|record {"page_location" 'type; string cited_text; decimal document_index; string document_title; decimal start_page_number; decimal end_page_number;}|record {"content_block_location" 'type; string cited_text; decimal document_index; string document_title; decimal start_block_index; decimal end_block_index;}|record {"web_search_result_location" 'type; string cited_text; string encrypted_index; string title; string url;}|record {"search_result_location" 'type; string cited_text; decimal search_result_index; string 'source; string title; decimal start_block_index; decimal end_block_index;})[] citations?; record {"ephemeral" 'type; "5m"|"1h" ttl?;} cache_control?;}[] system?;
+    AnthropicCacheControlDirective cache_control?;
+    MessagesRequest_context_management context_management?;
+    int max_tokens?;
+    MessagesMessageParam[] messages;
     AnthropicMessagesMetadata metadata?;
-    string[] stop_sequences?;
-    boolean 'stream?;
-    decimal temperature?;
-    decimal top_p?;
-    decimal top_k?;
-    (anydata)[] tools?;
-    record {"auto" 'type; boolean disable_parallel_tool_use?;}|record {"any" 'type; boolean disable_parallel_tool_use?;}|record {"none" 'type;}|record {"tool" 'type; string name; boolean disable_parallel_tool_use?;} tool_choice?;
-    record {"enabled" 'type; decimal budget_tokens; AnthropicThinkingDisplay display?;}|record {"disabled" 'type;}|record {"adaptive" 'type; AnthropicThinkingDisplay display?;} thinking?;
-    "auto"|"standard_only" service_tier?;
-    record {}? context_management?;
-    AnthropicCacheControl cache_control?;
-    # When multiple model providers are available, optionally indicate your routing preference.
-    AnthropicMessagesProvider provider?;
+    string model;
+    string[] models?;
+    # Configuration for controlling output behavior. Supports the effort parameter and structured output format.
+    MessagesOutputConfig output_config?;
     # Plugins you want to enable for this request, including their settings.
     (AutoRouterPlugin|ModerationPlugin|WebSearchPlugin|FileParserPlugin|ResponseHealingPlugin|ContextCompressionPlugin)[] plugins?;
+    # When multiple model providers are available, optionally indicate your routing preference.
+    ProviderPreferences provider?;
     # **DEPRECATED** Use providers.sort.partition instead. Backwards-compatible alias for providers.sort.partition. Accepts legacy values: "fallback" (maps to "model"), "sort" (maps to "none").
-    #
-    # # Deprecated
-    @deprecated
-    "fallback"|"sort" route?;
-    # A unique identifier representing your end-user, which helps distinguish between different users of your app. This allows your app to identify specific users in case of abuse reports, preventing your entire app from being affected by the actions of individual users. Maximum of 256 characters.
-    @constraint:String {maxLength: 256}
-    string user?;
+    DeprecatedRoute route?;
+    "auto"|"standard_only" service_tier?;
     # A unique identifier for grouping related requests (e.g., a conversation or agent workflow) for observability. If provided in both the request body and the x-session-id header, the body value takes precedence. Maximum of 256 characters.
     @constraint:String {maxLength: 256}
     string session_id?;
-    # Metadata for observability and tracing. Known keys (trace_id, trace_name, span_name, generation_name, parent_span_id) have special handling. Additional keys are passed through as custom metadata to configured broadcast destinations.
-    OpenResponsesRequest_trace trace?;
-    string[] models?;
-    # Configuration for controlling output behavior. Currently supports the effort parameter for Claude Opus 4.5.
-    AnthropicOutputConfig output_config?;
-    # Controls output generation speed. When set to `fast`, uses a higher-speed inference configuration at premium pricing. Defaults to `standard` when omitted.
     AnthropicSpeed speed?;
+    string[] stop_sequences?;
+    boolean 'stream?;
+    string|AnthropicTextBlockParam[] system?;
+    decimal temperature?;
+    record {int budget_tokens; AnthropicThinkingDisplay display?; "enabled" 'type;}|record {"disabled" 'type;}|record {AnthropicThinkingDisplay display?; "adaptive" 'type;} thinking?;
+    record {boolean disable_parallel_tool_use?; "auto" 'type;}|record {boolean disable_parallel_tool_use?; "any" 'type;}|record {"none" 'type;}|record {boolean disable_parallel_tool_use?; string name; "tool" 'type;} tool_choice?;
+    (anydata)[] tools?;
+    int top_k?;
+    decimal top_p?;
+    # Metadata for observability and tracing. Known keys (trace_id, trace_name, span_name, generation_name, parent_span_id) have special handling. Additional keys are passed through as custom metadata to configured broadcast destinations.
+    TraceConfig trace?;
+    # A unique identifier representing your end-user, which helps distinguish between different users of your app. This allows your app to identify specific users in case of abuse reports, preventing your entire app from being affected by the actions of individual users. Maximum of 256 characters.
+    @constraint:String {maxLength: 256}
+    string user?;
+};
+
+# Metadata for observability and tracing. Known keys (trace_id, trace_name, span_name, generation_name, parent_span_id) have special handling. Additional keys are passed through as custom metadata to configured broadcast destinations.
+public type TraceConfig record {
+    string generation_name?;
+    string parent_span_id?;
+    string span_name?;
+    string trace_id?;
+    string trace_name?;
+};
+
+public type AnthropicTextBlockParam record {
+    AnthropicCacheControlDirective cache_control?;
+    (AnthropicCitationCharLocationParam|AnthropicCitationPageLocationParam|AnthropicCitationContentBlockLocationParam|AnthropicCitationWebSearchResultLocation|AnthropicCitationSearchResultLocation)[] citations?;
+    string text;
+    "text" 'type;
+};
+
+public type AnthropicCitationSearchResultLocation record {
+    string cited_text;
+    int end_block_index;
+    int search_result_index;
+    string 'source;
+    int start_block_index;
+    string title;
+    "search_result_location" 'type;
+};
+
+public type AnthropicCitationWebSearchResultLocation record {
+    string cited_text;
+    string encrypted_index;
+    string title;
+    "web_search_result_location" 'type;
+    string url;
+};
+
+public type AnthropicCitationContentBlockLocationParam record {
+    string cited_text;
+    int document_index;
+    string document_title;
+    int end_block_index;
+    int start_block_index;
+    "content_block_location" 'type;
+};
+
+public type AnthropicCitationPageLocationParam record {
+    string cited_text;
+    int document_index;
+    string document_title;
+    int end_page_number;
+    int start_page_number;
+    "page_location" 'type;
+};
+# **DEPRECATED** Use providers.sort.partition instead. Backwards-compatible alias for providers.sort.partition. Accepts legacy values: "fallback" (maps to "model"), "sort" (maps to "none").
+# 
+# # Deprecated
+@deprecated
+public type DeprecatedRoute "fallback"|"sort"?;
+
+
+# Configuration for controlling output behavior. Supports the effort parameter and structured output format.
+public type MessagesOutputConfig record {
+    # How much effort the model should put into its response. Higher effort levels may result in more thorough analysis but take longer. Valid values are `low`, `medium`, `high`, or `max`.
+    "low"|"medium"|"high"|"max"? effort?;
+    # A schema to specify Claude's output format in responses. See [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs).
+    MessagesOutputConfig_format format?;
+};
+
+# Anthropic message with OpenRouter extensions
+public type MessagesMessageParam record {
+    anydata content;
+    "user"|"assistant" role;
+};
+
+
+public type MessagesRequest_context_management record {
+    (anydata)[] edits?;
+};
+
+# A schema to specify Claude's output format in responses. See [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs).
+public type MessagesOutputConfig_format record {
+    record {} schema;
+    "json_schema" 'type;
+};
+
+public type AnthropicCitationCharLocationParam record {
+    string cited_text;
+    int document_index;
+    string document_title;
+    int end_char_index;
+    int start_char_index;
+    "char_location" 'type;
 };
 
 # Represents the Headers record for the operation: deleteGuardrail
@@ -2861,7 +2797,6 @@ public type CreateKeyRequest record {
     # Optional ISO 8601 UTC timestamp when the API key should expire. Must be UTC, other timezones will be rejected
     string expires_at?;
     # Optional user ID of the key creator. Only meaningful for organization-owned keys where a specific member is creating the key.
-    @constraint:String {minLength: 1}
     string? creator_user_id?;
 };
 
