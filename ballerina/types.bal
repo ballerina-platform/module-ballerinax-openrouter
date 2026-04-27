@@ -224,7 +224,7 @@ public type AuthKeyResponse record {
 
 # Chat completion choice
 public type ChatResponseChoice record {
-    ChatCompletionFinishReason finish_reason;
+    anydata finish_reason;
     # Choice index
     decimal index;
     # Assistant message for requests and responses
@@ -653,8 +653,6 @@ public type GetGuardrailHeaders record {
     # The app display name allows you to customize how your app appears in OpenRouter's dashboard.
     string X\-OpenRouter\-Title?;
 };
-
-public type ChatCompletionFinishReason "tool_calls"|"stop"|"length"|"content_filter"|"error";
 
 # When multiple model providers are available, optionally indicate your routing preference.
 public type OpenResponsesRequest_provider record {|
@@ -1269,7 +1267,7 @@ public type CreateGuardrailRequest record {
 
 # List of available endpoints for a model
 public type ListEndpointsResponse record {
-    record {*ModelArchitecture; InputModality[] input_modalities; InstructType instruct_type; string modality; OutputModality[] output_modalities; ModelGroup tokenizer;} architecture;
+    record {*ModelArchitecture; InputModality[] input_modalities; InstructType? instruct_type; string modality; OutputModality[] output_modalities; ModelGroup tokenizer?;} architecture;
     # Unix timestamp of when the model was created
     int created;
     # Description of the model
@@ -1462,7 +1460,7 @@ public type KeyCodeRequest record {
     # Credit limit for the API key to be created
     decimal 'limit?;
     # Optional expiration time for the API key to be created
-    string expires_at?;
+    string? expires_at?;
     # Optional custom label for the API key. Defaults to the app name if not provided.
     @constraint:String {maxLength: 100}
     string key_label?;
@@ -1885,16 +1883,6 @@ public type GenerationData record {
     string http_referer;
 };
 
-# Represents the Headers record for the operation: createCoinbaseCharge
-public type CreateCoinbaseChargeHeaders record {
-    # Comma-separated list of app categories (e.g. "cli-agent,cloud-agent"). Used for marketplace rankings.
-    string X\-OpenRouter\-Categories?;
-    # The app identifier should be your app's URL and is used as the primary identifier for rankings.
-    # This is used to track API usage per application.
-    string HTTP\-Referer?;
-    # The app display name allows you to customize how your app appears in OpenRouter's dashboard.
-    string X\-OpenRouter\-Title?;
-};
 
 
 # Controls output generation speed. When set to `fast`, uses a higher-speed inference configuration at premium pricing.
@@ -2009,13 +1997,6 @@ public type ToolDefinitionJson record {
 };
 
 
-public type CoinbaseCreditData record {
-    string id;
-    string created_at;
-    string expires_at;
-    Web3Data web3_data;
-};
-
 # Represents the Headers record for the operation: bulkUnassignMembersFromGuardrail
 public type BulkUnassignMembersFromGuardrailHeaders record {
     # Comma-separated list of app categories (e.g. "cli-agent,cloud-agent"). Used for marketplace rankings.
@@ -2127,10 +2108,6 @@ public type AssignKeyHash string;
 
 public type ZdrEndpointsResponse record {
     PublicEndpoint[] data;
-};
-
-public type CoinbaseCreditResponse record {
-    CoinbaseCreditData data;
 };
 
 public type InputModality "text"|"image"|"file"|"audio"|"video";

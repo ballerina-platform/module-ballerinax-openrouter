@@ -94,17 +94,6 @@ public isolated client class Client {
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 
-    # Create a Coinbase charge for crypto payment
-    #
-    # + headers - Headers to be sent with the request 
-    # + return - Returns the calldata to fulfill the transaction 
-    resource isolated function post credits/coinbase(CreateCoinbaseChargeHeaders headers = {}) returns CoinbaseCreditResponse|error {
-        string resourcePath = string `/credits/coinbase`;
-        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
-        http:Request request = new;
-        return self.clientEp->post(resourcePath, request, httpHeaders);
-    }
-
     # Submit an embedding request
     #
     # + headers - Headers to be sent with the request 

@@ -60,6 +60,7 @@ http:Service mockService = service object {
                 limit_remaining: 98.50,
                 limit_reset: "monthly",
                 include_byok_in_limit: false,
+                creator_user_id: "user-123",
                 rate_limit: {requests: -1, interval: "10s", note: "Legacy field – always -1"}
             }
         };
