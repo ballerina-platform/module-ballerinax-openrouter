@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Nullable databinding
-- Formatting issue with sanitation doc
+- Nullable data binding issue — Fixed types in types.bal to correctly handle nullable fields, resolving data binding failures when the API returns optional/null values.
+- Fixed include_disabled? query parameter type from string to boolean in the GET /keys endpoint
 
 ## [1.0.0]
 
