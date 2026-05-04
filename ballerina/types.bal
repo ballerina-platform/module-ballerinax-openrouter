@@ -1320,7 +1320,7 @@ public type ListEndpointsResponse record {
     decimal created;
     # Description of the model
     string description;
-    ModelArchitecture architecture;
+    record {*ModelArchitecture; ModelGroup tokenizer; InstructType instruct_type; string modality; InputModality[] input_modalities; OutputModality[] output_modalities;} architecture;
     # List of available endpoints for this model
     PublicEndpoint[] endpoints;
 };
