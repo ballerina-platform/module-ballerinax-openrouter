@@ -5,7 +5,7 @@ name = "openrouter"
 version = "@toml.version@"
 license = ["Apache-2.0"]
 authors = ["Ballerina"]
-keywords = ["Agent", "Model", "Provider", "Vendor/OpenRouter", "Area/AI", "Type/Connector"]
+keywords = ["Agent", "Model Provider", "Vendor/OpenRouter", "Area/AI & Machine Learning", "Type/Connector"]
 icon = "icon.png"
 repository = "https://github.com/ballerina-platform/module-ballerinax-openrouter"
 

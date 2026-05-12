@@ -21,7 +21,7 @@ import ballerina/constraint;
 import ballerina/http;
 
 # Tokenizer type used by the model
-public type ModelGroup "Router"|"Media"|"Other"|"GPT"|"Claude"|"Gemini"|"Grok"|"Cohere"|"Nova"|"Qwen"|"Yi"|"DeepSeek"|"Mistral"|"Llama2"|"Llama3"|"Llama4"|"PaLM"|"RWKV"|"Qwen3";
+public type ModelGroup "Router"|"Media"|"Other"|"GPT"|"Claude"|"Gemini"|"Gemma"|"Grok"|"Cohere"|"Nova"|"Qwen"|"Yi"|"DeepSeek"|"Mistral"|"Llama2"|"Llama3"|"Llama4"|"PaLM"|"RWKV"|"Qwen3";
 
 # Create a Coinbase charge for crypto payment
 public type CreateChargeRequest record {
@@ -49,6 +49,8 @@ public type GuardrailInfo record {
     string[] ignored_providers?;
     # Array of model canonical_slugs (immutable identifiers)
     string[] allowed_models?;
+    # Array of model canonical_slugs to exclude from routing
+    string[]? ignored_models?;
     # Whether to enforce zero data retention
     boolean enforce_zdr?;
     # ISO 8601 timestamp of when the guardrail was created
@@ -122,7 +124,7 @@ public type OpenAIResponsesIncompleteDetails record {
 # The provider sorting strategy (price, throughput, latency)
 public type ProviderSortConfig record {
     # The provider sorting strategy (price, throughput, latency)
-    "price"|"throughput"|"latency" 'by?;
+    ("price"|"throughput"|"latency")? 'by?;
     # Partitioning strategy for sorting: "model" (default) groups endpoints by model before sorting (fallback models remain fallbacks), "none" sorts all endpoints together regardless of model.
     "model"|"none" partition?;
 };
@@ -223,7 +225,7 @@ public type AuthKeyResponse record {
     # The API key to use for OpenRouter requests
     string 'key;
     # User ID associated with the API key
-    string user_id;
+    string? user_id;
 };
 
 # Chat completion choice
@@ -441,9 +443,9 @@ public type ModelArchitecture record {
     # Tokenizer type used by the model
     ModelGroup tokenizer?;
     # Instruction format type
-    "none"|"airoboros"|"alpaca"|"alpaca-modif"|"chatml"|"claude"|"code-llama"|"gemma"|"llama2"|"llama3"|"mistral"|"nemotron"|"neural"|"openchat"|"phi3"|"rwkv"|"vicuna"|"zephyr"|"deepseek-r1"|"deepseek-v3.1"|"qwq"|"qwen3" instruct_type?;
+    ("none"|"airoboros"|"alpaca"|"alpaca-modif"|"chatml"|"claude"|"code-llama"|"gemma"|"llama2"|"llama3"|"mistral"|"nemotron"|"neural"|"openchat"|"phi3"|"rwkv"|"vicuna"|"zephyr"|"deepseek-r1"|"deepseek-v3.1"|"qwq"|"qwen3")? instruct_type?;
     # Primary modality of the model
-    string modality;
+    string? modality;
     # Supported input modalities
     InputModality[] input_modalities;
     # Supported output modalities
@@ -475,6 +477,8 @@ public type UpdatedGuardrailData record {
     string[] ignored_providers?;
     # Array of model canonical_slugs (immutable identifiers)
     string[] allowed_models?;
+    # Array of model canonical_slugs to exclude from routing
+    string[]? ignored_models?;
     # Whether to enforce zero data retention
     boolean enforce_zdr?;
     # ISO 8601 timestamp of when the guardrail was created
@@ -519,11 +523,11 @@ public type ApiKeyInfo record {
     # Whether the API key is disabled
     boolean disabled;
     # Spending limit for the API key in USD
-    decimal 'limit;
+    decimal? 'limit;
     # Remaining spending limit in USD
-    decimal limit_remaining;
+    decimal? limit_remaining;
     # Type of limit reset for the API key
-    string limit_reset;
+    string? limit_reset;
     # Whether to include external BYOK usage in the credit limit
     boolean include_byok_in_limit;
     # Total OpenRouter credit usage (in USD) for the API key
@@ -545,9 +549,11 @@ public type ApiKeyInfo record {
     # ISO 8601 timestamp of when the API key was created
     string created_at;
     # ISO 8601 timestamp of when the API key was last updated
-    string updated_at;
+    string? updated_at;
     # ISO 8601 UTC timestamp when the API key expires, or null if no expiration
     string expires_at?;
+    # User ID of the creator of the API key
+    string? creator_user_id?;
 };
 
 public type OutputItemFunctionCall record {
@@ -633,7 +639,7 @@ public type OpenResponsesRequest_provider_max_price record {
 # The engine to use for parsing PDF files.
 public type PDFParserEngine "mistral-ocr"|"pdf-text"|"native";
 
-public type Parameter "temperature"|"top_p"|"top_k"|"min_p"|"top_a"|"frequency_penalty"|"presence_penalty"|"repetition_penalty"|"max_tokens"|"logit_bias"|"logprobs"|"top_logprobs"|"seed"|"response_format"|"structured_outputs"|"stop"|"tools"|"tool_choice"|"parallel_tool_calls"|"include_reasoning"|"reasoning"|"reasoning_effort"|"web_search_options"|"verbosity";
+public type Parameter "temperature"|"top_p"|"top_k"|"min_p"|"top_a"|"frequency_penalty"|"presence_penalty"|"repetition_penalty"|"max_tokens"|"max_completion_tokens"|"logit_bias"|"logprobs"|"top_logprobs"|"seed"|"response_format"|"structured_outputs"|"stop"|"tools"|"tool_choice"|"parallel_tool_calls"|"include_reasoning"|"reasoning"|"reasoning_effort"|"web_search_options"|"verbosity";
 
 # Represents the Headers record for the operation: listModelsCount
 public type ListModelsCountHeaders record {
@@ -766,24 +772,21 @@ public type UpdateGuardrailRequest record {
     @constraint:String {maxLength: 200, minLength: 1}
     string name?;
     # New description for the guardrail
-    @constraint:String {maxLength: 1000}
-    string description?;
+    string? description?;
     # New spending limit in USD
-    @constraint:Number {minValue: 0}
-    decimal limit_usd?;
+    decimal? limit_usd?;
     # Interval at which the limit resets (daily, weekly, monthly)
     "daily"|"weekly"|"monthly" reset_interval?;
     # New list of allowed provider IDs
-    @constraint:Array {minLength: 1}
-    string[] allowed_providers?;
+    string[]? allowed_providers?;
     # List of provider IDs to exclude from routing
-    @constraint:Array {minLength: 1}
-    string[] ignored_providers?;
+    string[]? ignored_providers?;
     # Array of model identifiers (slug or canonical_slug accepted)
-    @constraint:Array {minLength: 1}
-    string[] allowed_models?;
+    string[]? allowed_models?;
+    # Array of model identifiers to exclude from routing
+    string[]? ignored_models?;
     # Whether to enforce zero data retention
-    boolean enforce_zdr?;
+    boolean? enforce_zdr?;
 };
 
 # Represents the Headers record for the operation: createAuthKeysCode
@@ -985,13 +988,13 @@ public type ReasoningDetailUnion ReasoningDetailSummary|ReasoningDetailEncrypted
 # Detailed completion token usage
 public type ChatGenerationTokenUsage_completion_tokens_details record {
     # Tokens used for reasoning
-    decimal reasoning_tokens?;
+    decimal? reasoning_tokens?;
     # Tokens used for audio output
-    decimal audio_tokens?;
+    decimal? audio_tokens?;
     # Accepted prediction tokens
-    decimal accepted_prediction_tokens?;
+    decimal? accepted_prediction_tokens?;
     # Rejected prediction tokens
-    decimal rejected_prediction_tokens?;
+    decimal? rejected_prediction_tokens?;
 };
 
 public type OpenAIResponsesAnnotation FileCitation|URLCitation|FilePath;
@@ -1183,11 +1186,11 @@ public type UpdatedApiKeyInfo record {
     # Whether the API key is disabled
     boolean disabled;
     # Spending limit for the API key in USD
-    decimal 'limit;
+    decimal? 'limit?;
     # Remaining spending limit in USD
-    decimal limit_remaining;
+    decimal? limit_remaining?;
     # Type of limit reset for the API key
-    string limit_reset;
+    string? limit_reset?;
     # Whether to include external BYOK usage in the credit limit
     boolean include_byok_in_limit;
     # Total OpenRouter credit usage (in USD) for the API key
@@ -1209,9 +1212,11 @@ public type UpdatedApiKeyInfo record {
     # ISO 8601 timestamp of when the API key was created
     string created_at;
     # ISO 8601 timestamp of when the API key was last updated
-    string updated_at;
+    string? updated_at;
     # ISO 8601 UTC timestamp when the API key expires, or null if no expiration
     string expires_at?;
+    # User ID of the creator of the API key
+    string? creator_user_id?;
 };
 
 # Percentile-based throughput cutoffs. All specified cutoffs must be met for an endpoint to be preferred.
@@ -1259,15 +1264,16 @@ public type PublicEndpoint record {
     ProviderName provider_name;
     string tag;
     Quantization quantization;
-    decimal max_completion_tokens;
-    decimal max_prompt_tokens;
+    decimal? max_completion_tokens?;
+    decimal? max_prompt_tokens?;
     Parameter[] supported_parameters;
     EndpointStatus status?;
-    decimal uptime_last_30m;
+    decimal? uptime_last_30m?;
+    decimal? uptime_last_5m?;
     boolean supports_implicit_caching;
     # Latency percentiles in milliseconds over the last 30 minutes. Latency measures time to first token. Only visible when authenticated with an API key or cookie; returns null for unauthenticated requests.
-    PercentileStats latency_last_30m;
-    PercentileStats throughput_last_30m;
+    PercentileStats? latency_last_30m;
+    PercentileStats? throughput_last_30m;
 };
 
 # File content part for document processing
@@ -1281,24 +1287,21 @@ public type CreateGuardrailRequest record {
     @constraint:String {maxLength: 200, minLength: 1}
     string name;
     # Description of the guardrail
-    @constraint:String {maxLength: 1000}
-    string description?;
+    string? description?;
     # Spending limit in USD
-    @constraint:Number {minValue: 0}
-    decimal limit_usd?;
+    decimal? limit_usd?;
     # Interval at which the limit resets (daily, weekly, monthly)
     "daily"|"weekly"|"monthly" reset_interval?;
     # List of allowed provider IDs
-    @constraint:Array {minLength: 1}
-    string[] allowed_providers?;
+    string[]? allowed_providers?;
     # List of provider IDs to exclude from routing
-    @constraint:Array {minLength: 1}
-    string[] ignored_providers?;
+    string[]? ignored_providers?;
     # Array of model identifiers (slug or canonical_slug accepted)
-    @constraint:Array {minLength: 1}
-    string[] allowed_models?;
+    string[]? allowed_models?;
+    # Array of model identifiers to exclude from routing
+    string[]? ignored_models?;
     # Whether to enforce zero data retention
-    boolean enforce_zdr?;
+    boolean? enforce_zdr?;
 };
 
 # A compound filter that combines multiple comparison or compound filters
@@ -1345,7 +1348,7 @@ public type OpenResponsesFunctionTool record {
     record {} parameters;
 };
 
-public type ProviderName "AI21"|"AionLabs"|"Alibaba"|"Ambient"|"Amazon Bedrock"|"Amazon Nova"|"Anthropic"|"Arcee AI"|"AtlasCloud"|"Avian"|"Azure"|"BaseTen"|"BytePlus"|"Black Forest Labs"|"Cerebras"|"Chutes"|"Cirrascale"|"Clarifai"|"Cloudflare"|"Cohere"|"Crusoe"|"DeepInfra"|"DeepSeek"|"Featherless"|"Fireworks"|"Friendli"|"GMICloud"|"Google"|"Google AI Studio"|"Groq"|"Hyperbolic"|"Inception"|"Inceptron"|"InferenceNet"|"Ionstream"|"Infermatic"|"Io Net"|"Inflection"|"Liquid"|"Mara"|"Mancer 2"|"Minimax"|"ModelRun"|"Mistral"|"Modular"|"Moonshot AI"|"Morph"|"NCompass"|"Nebius"|"NextBit"|"Novita"|"Nvidia"|"OpenAI"|"OpenInference"|"Parasail"|"Perplexity"|"Phala"|"Relace"|"SambaNova"|"Seed"|"SiliconFlow"|"Sourceful"|"StepFun"|"Stealth"|"StreamLake"|"Switchpoint"|"Together"|"Upstage"|"Venice"|"WandB"|"Xiaomi"|"xAI"|"Z.AI"|"FakeProvider";
+public type ProviderName "AkashML"|"AI21"|"AionLabs"|"Alibaba"|"Ambient"|"Amazon Bedrock"|"Amazon Nova"|"Anthropic"|"Arcee AI"|"AtlasCloud"|"Avian"|"Azure"|"BaseTen"|"BytePlus"|"Black Forest Labs"|"Cerebras"|"Chutes"|"Cirrascale"|"Clarifai"|"Cloudflare"|"Cohere"|"Crusoe"|"DeepInfra"|"DeepSeek"|"DekaLLM"|"Featherless"|"Fireworks"|"Friendli"|"GMICloud"|"Google"|"Google AI Studio"|"Groq"|"Hyperbolic"|"Inception"|"Inceptron"|"InferenceNet"|"Ionstream"|"Infermatic"|"Io Net"|"Inflection"|"Liquid"|"Mara"|"Mancer 2"|"Minimax"|"ModelRun"|"Mistral"|"Modular"|"Moonshot AI"|"Morph"|"NCompass"|"Nebius"|"NextBit"|"Novita"|"Nvidia"|"OpenAI"|"OpenInference"|"Parasail"|"Perplexity"|"Phala"|"Recraft"|"Reka"|"Relace"|"SambaNova"|"Seed"|"SiliconFlow"|"Sourceful"|"StepFun"|"Stealth"|"StreamLake"|"Switchpoint"|"Together"|"Upstage"|"Venice"|"WandB"|"Xiaomi"|"xAI"|"Z.AI"|"FakeProvider";
 
 # Video input content part
 public type ChatMessageContentItemVideo record {
@@ -1401,11 +1404,11 @@ public type CreatedKeyData record {
     # Whether the API key is disabled
     boolean disabled;
     # Spending limit for the API key in USD
-    decimal 'limit;
+    decimal? 'limit;
     # Remaining spending limit in USD
-    decimal limit_remaining;
+    decimal? limit_remaining;
     # Type of limit reset for the API key
-    string limit_reset;
+    string? limit_reset;
     # Whether to include external BYOK usage in the credit limit
     boolean include_byok_in_limit;
     # Total OpenRouter credit usage (in USD) for the API key
@@ -1427,9 +1430,11 @@ public type CreatedKeyData record {
     # ISO 8601 timestamp of when the API key was created
     string created_at;
     # ISO 8601 timestamp of when the API key was last updated
-    string updated_at;
+    string? updated_at;
     # ISO 8601 UTC timestamp when the API key expires, or null if no expiration
     string expires_at?;
+    # User ID of the creator of the API key
+    string? creator_user_id?;
 };
 
 public type OpenAIResponsesUsage_input_tokens_details record {
@@ -1523,24 +1528,24 @@ public type OpenAIResponsesNonStreamingResponse record {
     decimal created_at;
     string model;
     OpenAIResponsesResponseStatus status;
-    decimal completed_at;
+    decimal? completed_at;
     (OutputMessage|OutputItemReasoning|OutputItemFunctionCall|OutputItemWebSearchCall|OutputItemFileSearchCall|OutputItemImageGenerationCall)[] output;
     string user?;
     string output_text?;
     string prompt_cache_key?;
     string safety_identifier?;
     # Error information returned from the API
-    ResponsesErrorField 'error;
-    OpenAIResponsesIncompleteDetails incomplete_details;
+    ResponsesErrorField? 'error;
+    OpenAIResponsesIncompleteDetails? incomplete_details;
     OpenAIResponsesUsage usage?;
     decimal max_tool_calls?;
     decimal top_logprobs?;
     decimal max_output_tokens?;
-    decimal temperature;
-    decimal top_p;
-    decimal presence_penalty;
-    decimal frequency_penalty;
-    OpenAIResponsesInput instructions;
+    decimal? temperature;
+    decimal? top_p;
+    decimal? presence_penalty;
+    decimal? frequency_penalty;
+    OpenAIResponsesInput? instructions;
     # Metadata key-value pairs for the request. Keys must be ≤64 characters and cannot contain brackets. Values must be ≤512 characters. Maximum 16 pairs allowed.
     OpenResponsesRequestMetadata metadata;
     (record {*OpenResponsesFunctionTool;}|OpenResponsesWebSearchPreviewTool|OpenResponsesWebSearchPreview20250311Tool|OpenResponsesWebSearchTool|OpenResponsesWebSearch20250826Tool|OpenResponsesFileSearchTool|OpenResponsesComputerTool|OpenResponsesCodeInterpreterTool|OpenResponsesMcpTool|OpenResponsesImageGenerationTool|OpenResponsesLocalShellTool|OpenResponsesFunctionShellTool|OpenResponsesApplyPatchTool|OpenResponsesCustomTool)[] tools;
@@ -1549,12 +1554,12 @@ public type OpenAIResponsesNonStreamingResponse record {
     OpenAIResponsesPrompt prompt?;
     boolean background?;
     string previous_response_id?;
-    OpenAIResponsesReasoningConfig reasoning?;
+    OpenAIResponsesReasoningConfig? reasoning?;
     OpenAIResponsesServiceTier service_tier?;
     boolean store?;
-    OpenAIResponsesTruncation truncation?;
+    OpenAIResponsesTruncation? truncation?;
     # Text output configuration including format and verbosity
-    ResponseTextConfig text?;
+    ResponseTextConfig? text?;
 };
 
 # Chat completion response
@@ -1569,7 +1574,9 @@ public type ChatResponse record {
     string model;
     "chat.completion" 'object;
     # System fingerprint
-    string system_fingerprint?;
+    string? system_fingerprint;
+    # The service tier used by the upstream provider for this request
+    string? service_tier?;
     # Token usage statistics
     ChatGenerationTokenUsage usage?;
 };
@@ -1636,13 +1643,13 @@ public type ImageGenerationStatus "in_progress"|"completed"|"generating"|"failed
 # Detailed prompt token usage
 public type ChatGenerationTokenUsage_prompt_tokens_details record {
     # Cached prompt tokens
-    decimal cached_tokens?;
+    decimal? cached_tokens?;
     # Tokens written to cache. Only returned for models with explicit caching and cache write pricing.
-    decimal cache_write_tokens?;
+    decimal? cache_write_tokens?;
     # Audio input tokens
-    decimal audio_tokens?;
+    decimal? audio_tokens?;
     # Video input tokens
-    decimal video_tokens?;
+    decimal? video_tokens?;
 };
 
 public type ReasoningSummaryText record {
@@ -1768,12 +1775,12 @@ public type TopProviderInfo record {
 public type BaseAnthropicMessagesResponse_usage record {
     decimal input_tokens;
     decimal output_tokens;
-    decimal cache_creation_input_tokens;
-    decimal cache_read_input_tokens;
-    BaseAnthropicMessagesResponse_usage_cache_creation cache_creation;
-    string inference_geo;
-    BaseAnthropicMessagesResponse_usage_server_tool_use server_tool_use;
-    "standard"|"priority"|"batch" service_tier;
+    decimal? cache_creation_input_tokens;
+    decimal? cache_read_input_tokens;
+    BaseAnthropicMessagesResponse_usage_cache_creation? cache_creation;
+    string? inference_geo;
+    BaseAnthropicMessagesResponse_usage_server_tool_use? server_tool_use;
+    ("standard"|"priority"|"batch")? service_tier;
 };
 
 # Represents the Queries record for the operation: getGeneration
@@ -1791,43 +1798,38 @@ public type OpenResponsesFileSearchTool_ranking_options record {
 public type OpenResponsesRequest record {
     # Input for a response request - can be a string or array of items
     OpenResponsesInput input?;
-    string instructions?;
+    string? instructions?;
     # Metadata key-value pairs for the request. Keys must be ≤64 characters and cannot contain brackets. Values must be ≤512 characters. Maximum 16 pairs allowed.
     OpenResponsesRequestMetadata metadata?;
     (record {*OpenResponsesFunctionTool;}|OpenResponsesWebSearchPreviewTool|OpenResponsesWebSearchPreview20250311Tool|OpenResponsesWebSearchTool|OpenResponsesWebSearch20250826Tool|OpenResponsesFileSearchTool|OpenResponsesComputerTool|OpenResponsesCodeInterpreterTool|OpenResponsesMcpTool|OpenResponsesImageGenerationTool|OpenResponsesLocalShellTool|OpenResponsesFunctionShellTool|OpenResponsesApplyPatchTool|OpenResponsesCustomTool)[] tools?;
     OpenAIResponsesToolChoice tool_choice?;
-    boolean parallel_tool_calls?;
+    boolean? parallel_tool_calls?;
     string model?;
     string[] models?;
     # Text output configuration including format and verbosity
     OpenResponsesResponseText text?;
     # Configuration for reasoning mode in the response
     OpenResponsesReasoningConfig reasoning?;
-    decimal max_output_tokens?;
-    @constraint:Number {minValue: 0, maxValue: 2}
-    decimal temperature?;
-    @constraint:Number {minValue: 0}
-    decimal top_p?;
-    @constraint:Int {minValue: 0, maxValue: 20}
-    int top_logprobs?;
-    int max_tool_calls?;
-    @constraint:Number {minValue: -2, maxValue: 2}
-    decimal presence_penalty?;
-    @constraint:Number {minValue: -2, maxValue: 2}
-    decimal frequency_penalty?;
+    decimal? max_output_tokens?;
+    decimal? temperature?;
+    decimal? top_p?;
+    int? top_logprobs?;
+    int? max_tool_calls?;
+    decimal? presence_penalty?;
+    decimal? frequency_penalty?;
     decimal top_k?;
     # Provider-specific image configuration options. Keys and values vary by model/provider. See https://openrouter.ai/docs/features/multimodal/image-generation for more details.
     record {} image_config?;
     # Output modalities for the response. Supported values are "text" and "image".
     ResponsesOutputModality[] modalities?;
-    string prompt_cache_key?;
-    string previous_response_id?;
+    string? prompt_cache_key?;
+    string? previous_response_id?;
     OpenAIResponsesPrompt prompt?;
-    OpenAIResponsesIncludable[] include?;
-    boolean background?;
-    string safety_identifier?;
+    OpenAIResponsesIncludable[]? include?;
+    boolean? background?;
+    string? safety_identifier?;
     boolean store = false;
-    "auto" service_tier = "auto";
+    ("auto")? service_tier = "auto";
     OpenAIResponsesTruncation truncation?;
     boolean 'stream = false;
     # When multiple model providers are available, optionally indicate your routing preference.
@@ -1975,9 +1977,9 @@ public type UpdateKeyRequest record {
     # Whether to disable the API key
     boolean disabled?;
     # New spending limit for the API key in USD
-    decimal 'limit?;
+    decimal? 'limit?;
     # New limit reset type for the API key (daily, weekly, monthly, or null for no reset). Resets happen automatically at midnight UTC, and weeks are Monday through Sunday.
-    "daily"|"weekly"|"monthly" limit_reset?;
+    ("daily"|"weekly"|"monthly")? limit_reset?;
     # Whether to include BYOK usage in the limit
     boolean include_byok_in_limit?;
 };
@@ -1999,17 +2001,19 @@ public type Model record {
     # Pricing information for the model
     PublicPricing pricing;
     # Maximum context length in tokens
-    decimal context_length;
+    decimal? context_length;
+    # The date up to which the model was trained on data. ISO 8601 date string (YYYY-MM-DD) or null if unknown.
+    string? knowledge_cutoff;
     # Model architecture information
     ModelArchitecture architecture;
     # Information about the top provider for this model
     TopProviderInfo top_provider;
     # Per-request token limits
-    PerRequestLimits per_request_limits;
+    PerRequestLimits? per_request_limits;
     # List of supported parameters for this model
     Parameter[] supported_parameters;
     # Default parameters for this model
-    DefaultParameters default_parameters;
+    DefaultParameters? default_parameters;
     # The date after which the model may be removed. ISO 8601 date string (YYYY-MM-DD) or null if no expiration.
     string expiration_date?;
 };
@@ -2105,7 +2109,7 @@ public type CurrentKeyData record {
     # Human-readable label for the API key
     string label;
     # Spending limit for the API key in USD
-    decimal 'limit;
+    decimal? 'limit;
     # Total OpenRouter credit usage (in USD) for the API key
     decimal usage;
     # OpenRouter credit usage (in USD) for the current UTC day
@@ -2132,11 +2136,11 @@ public type CurrentKeyData record {
     @deprecated
     boolean is_provisioning_key;
     # Remaining spending limit in USD
-    decimal limit_remaining;
+    decimal? limit_remaining;
     # Type of limit reset for the API key
-    string limit_reset;
+    string? limit_reset;
     # Whether to include external BYOK usage in the credit limit
-    boolean include_byok_in_limit;
+    boolean? include_byok_in_limit;
     # ISO 8601 UTC timestamp when the API key expires, or null if no expiration
     string expires_at?;
     # Legacy rate limit information about a key. Will always return -1.
@@ -2340,9 +2344,9 @@ public type ChatGenerationTokenUsage record {
     # Total number of tokens
     decimal total_tokens;
     # Detailed completion token usage
-    ChatGenerationTokenUsage_completion_tokens_details completion_tokens_details?;
+    ChatGenerationTokenUsage_completion_tokens_details? completion_tokens_details?;
     # Detailed prompt token usage
-    ChatGenerationTokenUsage_prompt_tokens_details prompt_tokens_details?;
+    ChatGenerationTokenUsage_prompt_tokens_details? prompt_tokens_details?;
 };
 
 # Represents the Headers record for the operation: listModelsUser
@@ -2420,7 +2424,7 @@ public type ResponsesOutputItemReasoning record {
 
 public type KeysListResponse record {
     # List of API keys
-    record {string hash; string name; string label; boolean disabled; decimal 'limit; decimal limit_remaining; string limit_reset; boolean include_byok_in_limit; decimal usage; decimal usage_daily; decimal usage_weekly; decimal usage_monthly; decimal byok_usage; decimal byok_usage_daily; decimal byok_usage_weekly; decimal byok_usage_monthly; string created_at; string updated_at; string expires_at?;}[] data;
+    record {string hash; string name; string label; boolean disabled; decimal? 'limit; decimal? limit_remaining; string? limit_reset; boolean include_byok_in_limit; decimal usage; decimal usage_daily; decimal usage_weekly; decimal usage_monthly; decimal byok_usage; decimal byok_usage_daily; decimal byok_usage_weekly; decimal byok_usage_monthly; string created_at; string? updated_at; string? expires_at?;}[] data;
 };
 
 # Represents the Headers record for the operation: bulkUnassignKeysFromGuardrail
@@ -2444,7 +2448,7 @@ public type SystemMessage record {
 };
 
 public type ProvidersResponse record {
-    record {string name; string slug; string privacy_policy_url; string terms_of_service_url?; string status_page_url?;}[] data;
+    record {string name; string slug; string? privacy_policy_url; string? terms_of_service_url?; string? status_page_url?;}[] data;
 };
 
 public type DeleteKeyResponse record {
@@ -2486,32 +2490,27 @@ public type ChatGenerationParams record {
     # Models to use for completion
     ModelNames models?;
     # Frequency penalty (-2.0 to 2.0)
-    @constraint:Number {minValue: -2, maxValue: 2}
-    decimal frequency_penalty?;
+    decimal? frequency_penalty?;
     # Token logit bias adjustments
-    record {||} logit_bias?;
+    record {||}? logit_bias?;
     # Return log probabilities
-    boolean logprobs?;
+    boolean? logprobs?;
     # Number of top log probabilities to return (0-20)
-    @constraint:Number {minValue: 0, maxValue: 20}
-    decimal top_logprobs?;
+    decimal? top_logprobs?;
     # Maximum tokens in completion
-    @constraint:Number {minValue: 1}
-    decimal max_completion_tokens?;
+    decimal? max_completion_tokens?;
     # Maximum tokens (deprecated, use max_completion_tokens). Note: some providers enforce a minimum of 16.
-    @constraint:Number {minValue: 1}
-    decimal max_tokens?;
+    decimal? max_tokens?;
     # Key-value pairs for additional object information (max 16 pairs, 64 char keys, 512 char values)
     record {|string...;|} metadata?;
     # Presence penalty (-2.0 to 2.0)
-    @constraint:Number {minValue: -2, maxValue: 2}
-    decimal presence_penalty?;
+    decimal? presence_penalty?;
     # Configuration options for reasoning models
     ChatGenerationParams_reasoning reasoning?;
     # Response format configuration
     ResponseFormatText|ResponseFormatJSONObject|ResponseFormatJSONSchema|ResponseFormatTextGrammar|ResponseFormatTextPython response_format?;
     # Random seed for deterministic outputs
-    int seed?;
+    int? seed?;
     # Stop sequences (up to 4)
     anydata stop?;
     # Enable streaming response
@@ -2520,15 +2519,15 @@ public type ChatGenerationParams record {
     ChatStreamOptions stream_options?;
     # Sampling temperature (0-2)
     @constraint:Number {minValue: 0, maxValue: 2}
-    decimal temperature = 1;
-    boolean parallel_tool_calls?;
+    decimal? temperature = 1;
+    boolean? parallel_tool_calls?;
     # Tool choice configuration
     ToolChoiceOption tool_choice?;
     # Available tools for function calling
     ToolDefinitionJson[] tools?;
     # Nucleus sampling parameter (0-1)
     @constraint:Number {minValue: 0, maxValue: 1}
-    decimal top_p = 1;
+    decimal? top_p = 1;
     # Debug options for inspecting request transformations (streaming only)
     DebugOptions debug?;
     # Provider-specific image configuration options. Keys and values vary by model/provider. See https://openrouter.ai/docs/guides/overview/multimodal/image-generation for more details.
@@ -2537,12 +2536,14 @@ public type ChatGenerationParams record {
     ("text"|"image"|"audio")[] modalities?;
     # Enable automatic prompt caching. When set, the system automatically applies cache breakpoints to the last cacheable block in the request. Currently supported for Anthropic Claude models.
     ChatGenerationParams_cache_control cache_control?;
+    # The service tier to use for processing this request.
+    ("auto"|"default"|"flex"|"priority"|"scale")? service_tier?;
 };
 
 # Represents the Queries record for the operation: list
 public type ListQueries record {
     # Whether to include disabled API keys in the response
-    string include_disabled?;
+    boolean include_disabled?;
     # Number of API keys to skip for pagination
     string offset?;
 };
@@ -2686,7 +2687,7 @@ public type BaseAnthropicMessagesResponse record {
     (anydata)[] content;
     string model;
     "end_turn"|"max_tokens"|"stop_sequence"|"tool_use"|"pause_turn"|"refusal" stop_reason;
-    string stop_sequence;
+    string? stop_sequence;
     BaseAnthropicMessagesResponse_usage usage;
 };
 
@@ -2700,7 +2701,7 @@ public type FilePath record {
 public type AnthropicMessagesRequest record {
     string model;
     decimal max_tokens;
-    OpenRouterAnthropicMessageParam[] messages;
+    OpenRouterAnthropicMessageParam[]? messages;
     string|record {"text" 'type; string text; (record {"char_location" 'type; string cited_text; decimal document_index; string document_title; decimal start_char_index; decimal end_char_index;}|record {"page_location" 'type; string cited_text; decimal document_index; string document_title; decimal start_page_number; decimal end_page_number;}|record {"content_block_location" 'type; string cited_text; decimal document_index; string document_title; decimal start_block_index; decimal end_block_index;}|record {"web_search_result_location" 'type; string cited_text; string encrypted_index; string title; string url;}|record {"search_result_location" 'type; string cited_text; decimal search_result_index; string 'source; string title; decimal start_block_index; decimal end_block_index;})[] citations?; record {"ephemeral" 'type; "5m"|"1h" ttl?;} cache_control?;}[] system?;
     AnthropicMessagesMetadata metadata?;
     string[] stop_sequences?;
@@ -2712,6 +2713,7 @@ public type AnthropicMessagesRequest record {
     record {"auto" 'type; boolean disable_parallel_tool_use?;}|record {"any" 'type; boolean disable_parallel_tool_use?;}|record {"none" 'type;}|record {"tool" 'type; string name; boolean disable_parallel_tool_use?;} tool_choice?;
     record {"enabled" 'type; decimal budget_tokens;}|record {"disabled" 'type;}|record {"adaptive" 'type;} thinking?;
     "auto"|"standard_only" service_tier?;
+    record {}? context_management?;
     AnthropicCacheControl cache_control?;
     # When multiple model providers are available, optionally indicate your routing preference.
     AnthropicMessagesProvider provider?;

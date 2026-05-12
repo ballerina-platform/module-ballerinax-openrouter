@@ -89,7 +89,8 @@ http:Service mockService = service object {
                     finish_reason: "stop",
                     message: {role: "assistant", content: "Hello!"}
                 }
-            ]
+            ],
+            system_fingerprint: ()
         };
     }
 
@@ -129,8 +130,8 @@ http:Service mockService = service object {
                 name: payload.name,
                 label: payload.name,
                 disabled: false,
-                'limit: payload.'limit ?: 100.00,
-                limit_remaining: payload.'limit ?: 100.00,
+                'limit: payload?.'limit ?: 100.00,
+                limit_remaining: payload?.'limit ?: 100.00,
                 limit_reset: "monthly",
                 include_byok_in_limit: payload.include_byok_in_limit ?: false,
                 usage: 0.00,
@@ -183,8 +184,8 @@ http:Service mockService = service object {
                 name: payload.name ?: "test-ballerina-key",
                 label: payload.name ?: "Test Key",
                 disabled: payload.disabled ?: false,
-                'limit: payload.'limit ?: 100.00,
-                limit_remaining: payload.'limit ?: 100.00,
+                'limit: payload?.'limit ?: 100.00,
+                limit_remaining: payload?.'limit ?: 100.00,
                 limit_reset: "monthly",
                 include_byok_in_limit: payload.include_byok_in_limit ?: false,
                 usage: 1.50,
@@ -229,10 +230,10 @@ http:Service mockService = service object {
             data: {
                 id: MOCK_GUARDRAIL_ID,
                 name: payload.name,
-                description: payload.description,
-                limit_usd: payload.limit_usd,
+                description: payload["description"] ?: "test-guardrail",
+                limit_usd: payload["limit_usd"] ?: 0.0d,
                 reset_interval: payload.reset_interval,
-                enforce_zdr: payload.enforce_zdr ?: false,
+                enforce_zdr: payload["enforce_zdr"] ?: false,
                 created_at: MOCK_KEY_CREATED_AT
             }
         };
@@ -258,10 +259,10 @@ http:Service mockService = service object {
             data: {
                 id: id,
                 name: payload.name ?: "test-ballerina-guardrail",
-                description: payload.description,
-                limit_usd: payload.limit_usd,
+                description: payload["description"] ?: "test-guardrail",
+                limit_usd: payload["limit_usd"] ?: 0.0d,
                 reset_interval: payload.reset_interval,
-                enforce_zdr: payload.enforce_zdr ?: false,
+                enforce_zdr: payload["enforce_zdr"] ?: false,
                 created_at: MOCK_KEY_CREATED_AT,
                 updated_at: MOCK_KEY_UPDATED_AT
             }
