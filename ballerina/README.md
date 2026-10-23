@@ -3,6 +3,15 @@
 [OpenRouter](https://openrouter.ai/) is a unified API platform that provides access to multiple AI language models from various providers, allowing developers to easily switch between and compare different models through a single interface.
 
 The `ballerinax/openrouter` package offers APIs to connect and interact with [OpenRouter API](https://openrouter.ai/docs) endpoints, specifically based on [OpenRouter API v1](https://openrouter.ai/docs/api-reference).
+
+### Key features
+
+- Access chat completions, responses, messages and embeddings endpoints through a single client
+- List and inspect available models, providers and endpoints
+- Manage API keys and check credits and usage activity
+- Create and manage guardrails and their key and member assignments
+- Authenticate with a bearer API key
+
 ## Setup guide
 
 To use the OpenRouter connector, you must have access to the OpenRouter API through an [OpenRouter developer account](`https://openrouter.ai/docs`) and obtain an API access token. If you do not have an OpenRouter account, you can sign up for one [here](`https://openrouter.ai/`).
